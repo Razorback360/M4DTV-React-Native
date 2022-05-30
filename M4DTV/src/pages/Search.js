@@ -1,12 +1,11 @@
 import React, { useState, useRef } from 'react';
-import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { useWindowDimensions, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { getSearchResults } from "../utils/Requests";
-import { storeUser, retrieveUser } from "../utils/Storage";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import GenreResults from '../components/GenreResults';
 
-const SearchScreen = ({ navigation,route }) => {
+const SearchScreen = ({ navigation, route }) => {
     const inputRef = useRef(null);
     const { search_term } = route.params;
     const [query, setQuery] = useState(search_term);
@@ -68,12 +67,12 @@ const SearchScreen = ({ navigation,route }) => {
         }
     });
 
-    if(query && !alreadySearched || endReached){
+    if (query && !alreadySearched || endReached) {
         getSearchResults(query, endReached ? page + 1 : 1).then((data) => {
-            setResults(!endReached? data.results : results.concat(data.results))
-            !endReached ? setAlreadySearched(true): null
-            endReached ? setPage(page+1) : null
-            endReached ? setEndReached(false): null
+            setResults(!endReached ? data.results : results.concat(data.results))
+            !endReached ? setAlreadySearched(true) : null
+            endReached ? setPage(page + 1) : null
+            endReached ? setEndReached(false) : null
         })
     }
 
@@ -84,13 +83,13 @@ const SearchScreen = ({ navigation,route }) => {
                 flex: 1,
             }}>
             <TouchableOpacity onPress={() => { inputRef.current.focus() }} activeOpacity={0.6} >
-                <TextInput ref={inputRef} style={styles.searchBar} editable placeholder="Search" placeholderTextColor="#ffffff" 
-                onChangeText={(data) => {
-                    setQuery(data)
-                    setTimeout(function() {
-                        setAlreadySearched(false)
-                    }, 2000);
-                }}>{search_term}</TextInput>
+                <TextInput ref={inputRef} style={styles.searchBar} editable placeholder="Search" placeholderTextColor="#ffffff"
+                    onChangeText={(data) => {
+                        setQuery(data)
+                        setTimeout(function () {
+                            setAlreadySearched(false)
+                        }, 2000);
+                    }}>{search_term}</TextInput>
                 <Icon name="search" style={styles.icon}></Icon>
             </TouchableOpacity>
             <GenreResults data={results} imagestyle={styles.tinyLogo} onEndReached={(data) => {

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView, Image } from 'react-native';
+import { useWindowDimensions, Text, View, TextInput, TouchableOpacity, Image } from 'react-native';
 import { login } from "../utils/Requests";
 import { storeUser, retrieveUser } from "../utils/Storage";
 import LinearGradient from "react-native-linear-gradient";
@@ -9,7 +9,6 @@ const LoginScreen = ({ navigation }) => {
     const [pincode, setPincode] = useState(null);
     const [isError, setIsError] = useState(false)
     const [check, setCheck] = useState(true)
-    const [loggedIn, setLoggedIn] = useState(false)
     const size = useWindowDimensions();
     const width = size.width;
     const height = size.height;
@@ -19,7 +18,6 @@ const LoginScreen = ({ navigation }) => {
         if (data.user_id) {
             await storeUser(data.user_id)
             const user = await retrieveUser("user_id")
-            console.log(user)
             isError ? setIsError(false) : null
             navigation.replace("Home")
         }
@@ -31,7 +29,6 @@ const LoginScreen = ({ navigation }) => {
     if (check) {
         retrieveUser("user_id").then((user_id) => {
             if (user_id !== null) {
-                console.log(user_id)
                 navigation.replace("Home")
             }
         })
@@ -69,11 +66,11 @@ const LoginScreen = ({ navigation }) => {
                             setPincode(data)
                         }}></TextInput>
                 </TouchableOpacity>
-                {isError && <Text style={{ color: "red", fontSize: width *0.013 }}> INCORRECT PINCODE!</Text>}
-                <Text style={{ color: "#FFFFFF", fontSize: width *0.013 }}>
+                {isError && <Text style={{ color: "red", fontSize: width * 0.013 }}> INCORRECT PINCODE!</Text>}
+                <Text style={{ color: "#FFFFFF", fontSize: width * 0.013 }}>
                     Need a pincode? Head over to
                 </Text>
-                <Text style={{ color: "#0b8fff", fontSize: width *0.013 }}>
+                <Text style={{ color: "#0b8fff", fontSize: width * 0.013 }}>
                     https://movies4discord.xyz/connect
                 </Text>
             </View>

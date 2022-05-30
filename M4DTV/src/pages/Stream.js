@@ -10,12 +10,11 @@ import {
     Modal,
     useTVEventHandler
 } from 'react-native';
-import { getStreamMovie, getStreamTV } from "../utils/Requests";
+import { getStreamMovie, getStreamTV, addHistory, getSingleHistory } from "../utils/Requests";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { Video } from 'expo-av';
 import { useKeepAwake } from 'expo-keep-awake';
 import * as Progress from 'react-native-progress';
-import Subtitles from "react-native-subtitles"
 
 const StreamScreen = ({ navigation, route }) => {
     const { tmdb_id, isShow, tvdb_id, season, episode } = route.params;
@@ -31,6 +30,7 @@ const StreamScreen = ({ navigation, route }) => {
     const [status, setStatus] = useState({}) // Gets video status for use with video overlay
     const [progress, setProgress] = useState(0); // Video progress
     const [statusOverlayVisible, setStatusOverlayVisible] = useState(0) // Sets if progress overlay is visible or not
+    const [durationSet, setDurationSet] = useState(false)
 
     // Remote control keybinds for special interaction with video player. (Improvise adapt overcome)!
     const myTVEventHandler = (evt) => {
@@ -83,6 +83,7 @@ const StreamScreen = ({ navigation, route }) => {
     const size = useWindowDimensions();
     const width = size.width;
     const height = size.height;
+
 
     const styles = StyleSheet.create({
         container: {
@@ -201,8 +202,8 @@ const StreamScreen = ({ navigation, route }) => {
     const AS = `https://as.movies4discord.xyz/?viewkey=${key}`
     const US = `https://us.movies4discord.xyz/?viewkey=${key}`
 
-    function convertMsToTime(milliseconds) {
-        function padTo2Digits(num) {
+    const convertMsToTime = (milliseconds) => {
+        const padTo2Digits = (num) => {
             return num.toString().padStart(2, '0');
         }
         let seconds = Math.floor(milliseconds / 1000);
@@ -217,9 +218,34 @@ const StreamScreen = ({ navigation, route }) => {
         )}`;
     }
 
+    const modifyHistory = async () => {
+        if (isShow) {
+            await addHistory(tvdb_id, tmdb_id, season, episode, progress * 100)
+        }
+        else {
+            await addHistory(0, tmdb_id, 0, 0, progress * 100)
+        }
+    }
+
+    if (status.isLoaded && !durationSet && !tutorialVisible) {
+        if (isShow) {
+            const data = getSingleHistory(tvdb_id, tmdb_id, season, episode).then((data) => {
+                data.percentage !== null ? video.current.setPositionAsync(status.durationMillis * (data.percentage/100)).then(() => { }) : null
+                setDurationSet(true)
+            })
+        }
+        else {
+            const data = getSingleHistory(0, tmdb_id, 0, 0).then((data) => {
+                data.percentage !== null ? video.current.setPositionAsync(status.durationMillis * (data.percentage/100)).then(() => { }) : null
+                setDurationSet(true)
+            })
+        }
+
+    }
+
     return (
         <View style={styles.container}>
-            <TouchableOpacity onPress={() => { }} disabled={isdisabledOpacity} activeOpacity={1} hasTVPreferredFocus>
+            <TouchableOpacity onPress={() => { }} disabled={isdisabledOpacity} activeOpacity={1} hasTVPreferredFocus={true}>
                 <Video
                     ref={video}
                     style={styles.video}
@@ -229,9 +255,13 @@ const StreamScreen = ({ navigation, route }) => {
                     useNativeControls
                     shouldPlay={true}
                     resizeMode="contain"
-                    onPlaybackStatusUpdate={(status) => {
+                    onPlaybackStatusUpdate={async (status) => {
                         setStatus(status)
                         setProgress(status.positionMillis / status.durationMillis)
+                        console.log(progress)
+                        if (durationSet && !tutorialVisible) {
+                            await modifyHistory()
+                        }
                     }} />
             </TouchableOpacity>
             <View style={styles.overlay}>
@@ -242,7 +272,7 @@ const StreamScreen = ({ navigation, route }) => {
                     backgroundColor: "rgba(0, 0, 0, 0.9)",
                 }}>
                     <Text style={{ color: "#FFFFFF" }}>{convertMsToTime(status.positionMillis)}</Text>
-                    <Progress.Bar width={width * 0.8} borderWidth={1} unfilledColor={"#343434"} borderRadius={0} progress={parseFloat(progress.toFixed(2))} />
+                    {!isNaN(progress) && <Progress.Bar width={width * 0.8} borderWidth={1} unfilledColor={"#343434"} borderRadius={0} progress={parseFloat(progress.toFixed(2))}/>}
                     <Text style={{ color: "#FFFFFF" }}>{convertMsToTime(status.durationMillis)}</Text>
                 </View>
             </View>

@@ -1,8 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity } from 'react-native';
 import { getWatchlist } from "../utils/Requests";
-import { storeUser, retrieveUser } from "../utils/Storage";
-import MediaSlider from "../components/MediaSlider";
 import GenreResults from '../components/GenreResults';
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -88,7 +86,7 @@ const WatchlistScreen = ({ navigation }) => {
             <View style={styles.navView}>
                 <TouchableOpacity onPress={() => {
                     navigation.navigate("Movies")
-                }}>
+                }} hasTVPreferredFocus={true}>
                     <Text style={styles.textStyle}>   Movies  </Text>
                     <Icon name={"movie"} color={"#ffffff"} size={width * 0.021} style={styles.icons} />
                 </TouchableOpacity>

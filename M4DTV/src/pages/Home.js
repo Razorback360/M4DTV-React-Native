@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView } from 'react-native';
 import { getTrending, getGenreMovies } from "../utils/Requests";
-import { storeUser, retrieveUser } from "../utils/Storage";
 import MediaSlider from "../components/MediaSlider";
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
@@ -95,7 +94,7 @@ const HomeScreen = ({ navigation }) => {
       <View style={styles.navView}>
         <TouchableOpacity onPress={() => {
           navigation.navigate("Movies")
-        }}>
+        }} hasTVPreferredFocus={true}>
           <Text style={styles.textStyle}>   Movies  </Text>
           <Icon name={"movie"} color={"#ffffff"} size={width * 0.021} style={styles.icons} />
         </TouchableOpacity>
@@ -111,7 +110,7 @@ const HomeScreen = ({ navigation }) => {
           <Text style={styles.textStyle}>   Watchlist  </Text>
           <Icon name={"format-list-bulleted"} color={"#ffffff"} size={width * 0.021} style={styles.icons} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() =>{
+        <TouchableOpacity onPress={() => {
           navigation.navigate("History")
         }}>
           <Text style={styles.textStyle}>   History</Text>
@@ -119,7 +118,7 @@ const HomeScreen = ({ navigation }) => {
         </TouchableOpacity>
         <TouchableOpacity onPress={() => { inputRef.current.focus() }} activeOpacity={0.6} style={{ width: "62%" }}>
           <TextInput ref={inputRef} style={styles.searchBar} editable placeholder="Search" placeholderTextColor="#ffffff" onSubmitEditing={() => {
-            navigation.navigate("Search", {search_term: searchTerm})
+            navigation.navigate("Search", { search_term: searchTerm })
           }} onChangeText={(data) => {
             setSearchTerm(data)
           }}></TextInput>

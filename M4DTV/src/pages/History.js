@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView } from 'react-native';
+import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity } from 'react-native';
 import LinearGradient from "react-native-linear-gradient";
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { getHistory } from '../utils/Requests';
@@ -86,7 +86,7 @@ const HistoryScreen = ({ navigation }) => {
       <View style={styles.navView}>
         <TouchableOpacity onPress={() => {
           navigation.navigate("Movies")
-        }}>
+        }} hasTVPreferredFocus={true}>
           <Text style={styles.textStyle}>   Movies  </Text>
           <Icon name={"movie"} color={"#ffffff"} size={width * 0.021} style={styles.icons} />
         </TouchableOpacity>
@@ -96,7 +96,7 @@ const HistoryScreen = ({ navigation }) => {
           <Text style={styles.textStyle}>   TV  </Text>
           <Icon name={"tv"} color={"#ffffff"} size={width * 0.021} style={styles.icons} />
         </TouchableOpacity>
-        <TouchableOpacity onPress={() => {navigation.navigate("Watchlist")}}>
+        <TouchableOpacity onPress={() => { navigation.navigate("Watchlist") }}>
           <Text style={styles.textStyle}>   Watchlist  </Text>
           <Icon name={"format-list-bulleted"} color={"#ffffff"} size={width * 0.021} style={styles.icons} />
         </TouchableOpacity>
@@ -113,7 +113,7 @@ const HistoryScreen = ({ navigation }) => {
           <Icon name="search" style={styles.icon}></Icon>
         </TouchableOpacity>
       </View>
-      <GenreResults data={history} imagestyle={styles.tinyLogo} onEndReached={(data) => {}}/>
+      <GenreResults data={history} imagestyle={styles.tinyLogo} onEndReached={(data) => { }} />
     </LinearGradient>);
 };
 

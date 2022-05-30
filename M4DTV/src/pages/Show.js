@@ -24,7 +24,6 @@ const ShowScreen = ({ navigation, route }) => {
     const [season, setSeason] = useState(1);
     const [streamModalVisible, setStreamModalVisible] = useState(false)
     const [trailerModalVisible, setTrailerModalVisible] = useState(false)
-    const [testvar, setTestVar] = useState("no")
     const video = useRef(null);
     const [status, setStatus] = useState({});
     const [watchlist, setWatchlist] = useState(null);
@@ -201,7 +200,7 @@ const ShowScreen = ({ navigation, route }) => {
                         <Text style={styles.extras}> {show.vote_average}</Text>
                     </View>
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity onPress={() => { setStreamModalVisible(true) }} style={styles.button} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={() => { setStreamModalVisible(true) }} style={styles.button} activeOpacity={0.7} hasTVPreferredFocus={true}>
                             <View style={{ flexDirection: 'row', justifyContent: "center", alignContent: "center" }}>
                                 <Icon style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0197 }} name="play-circle"></Icon>
                                 <Text style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0146 }}>Stream</Text>

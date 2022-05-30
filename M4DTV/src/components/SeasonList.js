@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import React, { PureComponent } from 'react';
-import { Image, TouchableOpacity, FlatList, Text, View, touch, Dimensions } from 'react-native';
-import Icon from "react-native-vector-icons/MaterialIcons";
+import { TouchableOpacity, FlatList, Text, View, touch, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 class SeasonList extends PureComponent {
@@ -13,7 +12,6 @@ class SeasonList extends PureComponent {
         const width = Dimensions.get('window').width;
         const height = Dimensions.get('window').height;
         const AddItem = ({ item }) => {
-            console.log(item)
             return (
                 <TouchableOpacity activeOpacity={0.5} onPress={() => {
                     this.props.onChange(item)

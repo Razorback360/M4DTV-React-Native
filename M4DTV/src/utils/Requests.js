@@ -1,9 +1,5 @@
 import {
     TMDB_API_KEY,
-    RADARR_API_KEY,
-    RADARR_URL,
-    SONARR_API_KEY,
-    SONARR_URL,
     M4D_API_URL
 } from "../../Secrets"
 import { retrieveUser } from "./Storage";
@@ -41,7 +37,6 @@ export const getShow = async (show_id) => {
     const reqSonarr = await fetch(`${M4D_API_URL}/show?tvdbId=${tvdb}&id=${user_id}`)
     const sonarrjsondata = await reqSonarr.json();
 
-    console.log(reqSonarr.url)
 
     const reqWatchlist = await fetch(`${M4D_API_URL}/watchlist?id=${user_id}&tmdbId=${show_id}&isShow=true`)
     const watchlistjsondata = await reqWatchlist.json()
@@ -52,7 +47,6 @@ export const getShow = async (show_id) => {
     }
 
     sonarrjsondata.episodes.forEach(ep_constructor)
-    console.log(sonarrjsondata.seasons)
     const final_data = {
         tmdb_id: jsondata.id,
         tvdb_id: tvdb,
@@ -168,7 +162,7 @@ export const getWatchlist = async () => {
 
 export const addWatchlist = async (tmdb_id, isShow) => {
     const user_id = await retrieveUser("user_id")
-    const req = await fetch(`${M4D_API_URL}/watchlist?id=${user_id}&isShow=${isShow}&tmdbId=${tmdb_id}`, {method: "POST"})
+    const req = await fetch(`${M4D_API_URL}/watchlist?id=${user_id}&isShow=${isShow}&tmdbId=${tmdb_id}`, { method: "POST" })
     const jsondata = await req.json()
 
     return jsondata
@@ -176,7 +170,7 @@ export const addWatchlist = async (tmdb_id, isShow) => {
 
 export const deleteWatchlist = async (tmdb_id, isShow) => {
     const user_id = await retrieveUser("user_id")
-    const req = await fetch(`${M4D_API_URL}/watchlist?id=${user_id}&isShow=${isShow}&tmdbId=${tmdb_id}`, {method: "DELETE"})
+    const req = await fetch(`${M4D_API_URL}/watchlist?id=${user_id}&isShow=${isShow}&tmdbId=${tmdb_id}`, { method: "DELETE" })
     const jsondata = await req.json()
 
     return jsondata
@@ -218,4 +212,24 @@ export const getHistory = async () => {
 
 export const addHistory = async (tvdb_id = 0, tmdb_id = 0, season = 0, episode = 0, percentage) => {
     const user_id = await retrieveUser("user_id")
+    const media_type = tvdb_id === 0 ? "movie" : "tv"
+
+    const req = await fetch(
+        `${M4D_API_URL}/history?id=${user_id}&tmdbId=${tmdb_id}&tvdbId=${tvdb_id}&season=${season}&episode=${episode}&media_type=${media_type}&percentage=${percentage}`,
+        { method: "POST" }
+    )
+    const res = await req.json()
+
+    return res;
+}
+
+export const getSingleHistory = async (tvdb_id = 0, tmdb_id = 0, season = 0, episode = 0) => {
+    const user_id = await retrieveUser("user_id")
+    const media_type = tvdb_id === 0 ? "movie" : "tv"
+
+    const req = await fetch(
+        `${M4D_API_URL}/history?id=${user_id}&tmdbId=${tmdb_id}&tvdbId=${tvdb_id}&season=${season}&episode=${episode}&media_type=${media_type}&one=true`)
+    const res = await req.json();
+
+    return res;
 }

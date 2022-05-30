@@ -1,10 +1,7 @@
-import React, { useState, useRef } from 'react';
-import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { getTrending, getGenreMovies, getGenresMovies } from "../utils/Requests";
-import { storeUser, retrieveUser } from "../utils/Storage";
-import MediaSlider from "../components/MediaSlider";
+import React, { useState } from 'react';
+import { useWindowDimensions, View, StyleSheet, ActivityIndicator } from 'react-native';
+import { getGenreMovies, getGenresMovies } from "../utils/Requests";
 import LinearGradient from "react-native-linear-gradient";
-import Icon from "react-native-vector-icons/MaterialIcons";
 import GenreView from '../components/GenreView';
 import GenreResults from "../components/GenreResults";
 
@@ -63,14 +60,16 @@ const MoviesScreen = ({ navigation }) => {
             style={{
                 flex: 1,
             }}><View style={styles.list}>
-                 <GenreView data={genres}></GenreView>
+                 <GenreView data={genres} onChange={(data) => {
+                    setGenre(data)
+                    setMovies(null)
+                }}></GenreView>
             </View>
            
-            <GenreResults data={movies} imagestyle={styles.tinyLogo} onEndReached={(data) => {
-                console.log(data)
+            {movies && <GenreResults data={movies} imagestyle={styles.tinyLogo} onEndReached={(data) => {
                 setEndReached(data)
                 setLoadingData(true)
-            }}></GenreResults>
+            }}></GenreResults>}
             {loadingData && <ActivityIndicator></ActivityIndicator>}
         </LinearGradient>);
 };

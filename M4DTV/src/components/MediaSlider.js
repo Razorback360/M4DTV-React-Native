@@ -1,6 +1,6 @@
 import PropTypes from "prop-types";
 import React, { PureComponent } from 'react';
-import { Image, TouchableOpacity, FlatList, Text, View, touch, Dimensions } from 'react-native';
+import { Image, TouchableOpacity, FlatList, Text, View, Dimensions } from 'react-native';
 import Icon from "react-native-vector-icons/MaterialIcons";
 import { useNavigation } from '@react-navigation/native';
 
@@ -13,16 +13,26 @@ class MediaSlider extends PureComponent {
             PropTypes.shape({}),
         ]).isRequired,
     }
+    constructor(props) {
+        super(props);
+        this.myRef = React.createRef();
+    }
     render = () => {
         const { data, imagestyle, navigation } = this.props;
         const width = Dimensions.get('window').width;
         const height = Dimensions.get('window').height;
+        const changeBorder = (focused) => {
+            console.log(focused)
+            this.myRef.current.setNativeProps({
+                activeOpacity: 0.1
+            })
+        }
         const AddItem = ({ item }) => {
             if (item.media_type !== "person" && Object.keys(item).includes("media_type")) {
         
-                return (<TouchableOpacity activeOpacity={0.5} onPress={() => {
+                return (<TouchableOpacity ref={this.myRef} activeOpacity={0.5} onPress={() => {
                     navigation.navigate(item.media_type == "movie" ? 'Movie' : "tv", { id: item.id })
-                }}>
+                }} onFocus={() => {changeBorder(true)}} onBlur={() => {changeBorder(false)}}>
                     <Image
                         style={imagestyle}
                         source={{
@@ -45,9 +55,9 @@ class MediaSlider extends PureComponent {
                 </TouchableOpacity>)
             }
             else if (!Object.keys(item).includes("media_type")) {
-                return (<TouchableOpacity activeOpacity={0.5} onPress={() => {
+                return (<TouchableOpacity ref={this.myRef} activeOpacity={0.5} onPress={() => {
                     navigation.navigate(Object.keys(item).includes("release_date") ? 'Movie' : "tv", { id: item.id })
-                }}>
+                }} onFocus={() => {changeBorder(true)}} onBlur={() => {changeBorder(false)}}>
                     <Image
                         style={imagestyle}
                         source={{

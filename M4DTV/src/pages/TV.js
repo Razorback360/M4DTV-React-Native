@@ -1,7 +1,6 @@
-import React, { useState, useRef } from 'react';
-import { useWindowDimensions, Text, View, StyleSheet, ActivityIndicator, TextInput, TouchableOpacity, ScrollView } from 'react-native';
-import { getTrending, getGenreShows, getGenresShows } from "../utils/Requests";
-import { storeUser, retrieveUser } from "../utils/Storage";
+import React, { useState } from 'react';
+import { useWindowDimensions, View, StyleSheet, ActivityIndicator } from 'react-native';
+import { getGenreShows, getGenresShows } from "../utils/Requests";
 import LinearGradient from "react-native-linear-gradient";
 import GenreView from '../components/GenreView';
 import GenreResults from '../components/GenreResults';
@@ -69,17 +68,15 @@ const ShowsScreen = ({ navigation }) => {
             }}><View style={styles.list}>
                 <GenreView data={genres} onChange={(data) => {
                     setGenre(data)
-                    console.log(data)
                     setShows(null)
                 }}></GenreView>
                 {!shows && <ActivityIndicator></ActivityIndicator>}
             </View>
 
-            <GenreResults data={shows} imagestyle={styles.tinyLogo} onEndReached={(data) => {
-                console.log(data)
+            {shows && <GenreResults data={shows} imagestyle={styles.tinyLogo} onEndReached={(data) => {
                 setEndReached(data)
                 setLoadingData(true)
-            }}></GenreResults>
+            }}></GenreResults>}
             {loadingData && <ActivityIndicator></ActivityIndicator>}
         </LinearGradient>);
 };

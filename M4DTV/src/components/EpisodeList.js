@@ -1,7 +1,6 @@
 import PropTypes from "prop-types";
 import React, { PureComponent } from 'react';
-import { Image, TouchableOpacity, FlatList, Text, View, touch, Dimensions } from 'react-native';
-import Icon from "react-native-vector-icons/MaterialIcons";
+import { Image, TouchableOpacity, FlatList, Text, View, Dimensions } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
 
 class EpisodeList extends PureComponent {
@@ -23,11 +22,7 @@ class EpisodeList extends PureComponent {
                 return (
                     <TouchableOpacity activeOpacity={0.5} onPress={() => {
                         if(item.available){
-                            console.log(item.tvdb_id)
-                            navigation.navigate("Stream", { tvdb_id: item.tvdb_id, season: item.seasonNumber, episode: item.episodeNumber, isShow: true })
-                        }
-                        else{
-                            console.log("Not available")
+                            navigation.navigate("Stream", { tvdb_id: item.tvdb_id, season: item.seasonNumber, episode: item.episodeNumber, isShow: true, tmdb_id: item.tmdb_id})
                         }
                         this.props.onChange(false)
                     }} disabled={!item.available? true : false}>

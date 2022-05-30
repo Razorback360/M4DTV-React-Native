@@ -11,9 +11,8 @@ import {
     Modal,
 } from 'react-native';
 import { addWatchlist, getMovie, deleteWatchlist } from "../utils/Requests";
-import Icon  from "react-native-vector-icons/MaterialCommunityIcons";
+import Icon from "react-native-vector-icons/MaterialCommunityIcons";
 import { Video } from 'expo-av';
-//import AsyncStorage from '@react-native-async-storage/async-storage';
 
 
 const MovieScreen = ({ navigation, route }) => {
@@ -168,8 +167,8 @@ const MovieScreen = ({ navigation, route }) => {
                 </View>
                 <View style={styles.informationContainer}>
                     <View style={styles.logoContainer}>
-                        { movie.images.logos.length !== 0 && <Image source={{ uri: `https://image.tmdb.org/t/p/original${movie.images.logos[0].file_path.includes(".svg") ? movie.images.logos[0].file_path.replace(".svg", ".png") : movie.images.logos[0].file_path}` }} style={styles.logo} resizeMode='contain'></Image>}
-                        { movie.images.logos.length === 0 && <Text style={{color:"#FFFFFF"}}>{movie.title}</Text>}
+                        {movie.images.logos.length !== 0 && <Image source={{ uri: `https://image.tmdb.org/t/p/original${movie.images.logos[0].file_path.includes(".svg") ? movie.images.logos[0].file_path.replace(".svg", ".png") : movie.images.logos[0].file_path}` }} style={styles.logo} resizeMode='contain'></Image>}
+                        {movie.images.logos.length === 0 && <Text style={{ color: "#FFFFFF" }}>{movie.title}</Text>}
                     </View>
                     <View style={styles.extrasContainer}>
                         <Icon name='calendar-outline' style={styles.icons}></Icon>
@@ -180,24 +179,24 @@ const MovieScreen = ({ navigation, route }) => {
                         <Text style={styles.extras}> {movie.vote_average}</Text>
                     </View>
                     <View style={styles.buttonContainer}>
-                        <TouchableOpacity onPress={() => { navigation.navigate("Stream", { tmdb_id: movie.id, isShow: false }) }} style={styles.button} activeOpacity={0.7} disabled={!movie.available ? true : false}>
+                        <TouchableOpacity onPress={() => { navigation.navigate("Stream", { tmdb_id: movie.id, isShow: false }) }} style={styles.button} activeOpacity={0.7} disabled={!movie.available ? true : false} hasTVPreferredFocus={movie.available ? true : false}>
                             <View style={{ flexDirection: 'row', justifyContent: "center", alignContent: "center" }}>
-                                <Icon style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0197}} name={!movie.available ? "eye-off" : "play-circle"}></Icon>
+                                <Icon style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0197 }} name={!movie.available ? "eye-off" : "play-circle"}></Icon>
                                 <Text style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0146 }}>{!movie.available ? "Unavailable" : "Stream"}</Text>
                             </View>
                         </TouchableOpacity>
-                        <TouchableOpacity onPress={async () => {}} style={styles.button} activeOpacity={0.7}>
+                        <TouchableOpacity onPress={async () => { }} style={styles.button} activeOpacity={0.7} hasTVPreferredFocus={movie.available ? false : true}>
                             <View style={{ flexDirection: 'row', justifyContent: "center", alignContent: "center" }}>
-                                <Icon style={{ flexDirection: 'column', color: "#000000", fontSize:width * 0.0197 }} name="video-vintage"></Icon>
-                                <Text style={{ flexDirection: 'column', color: "#000000", fontSize:width * 0.0146}}> Trailer</Text>
+                                <Icon style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0197 }} name="video-vintage"></Icon>
+                                <Text style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0146 }}> Trailer</Text>
                             </View>
                         </TouchableOpacity>
                         <TouchableOpacity onPress={() => {
                             watchlist ? deleteWatchlist(movie.id, false) : addWatchlist(movie.id, false)
                             setWatchlist(!watchlist)
-                         }} style={styles.circleButton} activeOpacity={0.7}>
+                        }} style={styles.circleButton} activeOpacity={0.7}>
                             <View style={{ flexDirection: 'row', justifyContent: "center", alignContent: "center" }}>
-                                {!watchlist && <Icon style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0197 }} name="playlist-plus"></Icon> }
+                                {!watchlist && <Icon style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0197 }} name="playlist-plus"></Icon>}
                                 {watchlist && <Icon style={{ flexDirection: 'column', color: "#000000", fontSize: width * 0.0197 }} name="playlist-remove"></Icon>}
                             </View>
                         </TouchableOpacity>
