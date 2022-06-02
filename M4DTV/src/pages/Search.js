@@ -1,8 +1,7 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
-  Text,
-  View,
   StyleSheet,
   ActivityIndicator,
   TextInput,
@@ -10,7 +9,6 @@ import {
   ScrollView,
 } from 'react-native';
 import {getSearchResults} from '../utils/Requests';
-import {storeUser, retrieveUser} from '../utils/Storage';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import GenreResults from '../components/GenreResults';
@@ -110,16 +108,17 @@ const SearchScreen = ({navigation, route}) => {
           }}>
           {search_term}
         </TextInput>
-        <Icon name="search" style={styles.icon}></Icon>
+        <Icon name="search" style={styles.icon} />
       </TouchableOpacity>
       <GenreResults
         data={results}
         imagestyle={styles.tinyLogo}
         onEndReached={data => {
           setEndReached(data);
-        }}></GenreResults>
-      {(endReached && <ActivityIndicator></ActivityIndicator>) ||
-        (!alreadySearched && <ActivityIndicator></ActivityIndicator>)}
+        }}
+      />
+      {(endReached && <ActivityIndicator />) ||
+        (!alreadySearched && <ActivityIndicator />)}
     </LinearGradient>
   );
 };

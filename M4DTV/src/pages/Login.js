@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
@@ -65,7 +66,8 @@ const LoginScreen = ({navigation}) => {
         }}>
         <Image
           source={require('../static/logo.png')}
-          style={{width: '35%', height: '32%', marginTop: '10%'}}></Image>
+          style={{width: '35%', height: '32%', marginTop: '10%'}}
+        />
         <TouchableOpacity
           onPress={() => {
             inputRef.current.focus();
@@ -96,7 +98,8 @@ const LoginScreen = ({navigation}) => {
             }}
             onChangeText={data => {
               setPincode(data);
-            }}></TextInput>
+            }}
+          />
         </TouchableOpacity>
         {isError && (
           <Text style={{color: 'red', fontSize: width * 0.013}}>

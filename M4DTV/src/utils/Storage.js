@@ -5,7 +5,7 @@ export const storeUser = async user_id => {
     await AsyncStorage.setItem('user_id', user_id);
     return 'Success';
   } catch (error) {
-    console.log(error);
+    return;
   }
 };
 

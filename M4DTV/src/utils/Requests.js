@@ -1,11 +1,4 @@
-import {
-  TMDB_API_KEY,
-  RADARR_API_KEY,
-  RADARR_URL,
-  SONARR_API_KEY,
-  SONARR_URL,
-  M4D_API_URL,
-} from '../../Secrets';
+import {TMDB_API_KEY, M4D_API_URL} from '../../Secrets';
 import {retrieveUser} from './Storage';
 
 export const getMovie = async movie_id => {
@@ -88,6 +81,16 @@ export const getShow = async show_id => {
   return final_data;
 };
 
+export const getSubtitles = async () => {
+  const req = await fetch(
+    `${M4D_API_URL}/subtitles?t=movie&q=red&language=en&id=cl0bzlsor5111571nm684agflvl`,
+  ).catch(err => {
+    console.error(`error fetchin subtitles ${err}`);
+  });
+  const jsondata = await req.json();
+  console.log(`getSubtitles jsondata log${jsondata.toString()}`);
+  return jsondata;
+};
 export const getTrending = async (page = 1) => {
   const req = await fetch(
     `https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_API_KEY}&page=${page}`,
@@ -159,6 +162,9 @@ export const getSearchResults = async (query, page = 1) => {
 export const login = async pincode => {
   const req = await fetch(`${M4D_API_URL}/connect?pincode=${pincode}`, {
     method: 'POST',
+  }).catch(err => {
+    const error = err;
+    console.error(error);
   });
   const jsondata = await req.json();
   return jsondata;
@@ -263,4 +269,30 @@ export const addHistory = async (
   percentage,
 ) => {
   const user_id = await retrieveUser('user_id');
+  const media_type = tvdb_id === 0 ? 'movie' : 'tv';
+
+  const req = await fetch(
+    `${M4D_API_URL}/history?id=${user_id}&tmdbId=${tmdb_id}&tvdbId=${tvdb_id}&season=${season}&episode=${episode}&media_type=${media_type}&percentage=${percentage}`,
+    {method: 'POST'},
+  );
+  const res = await req.json();
+
+  return res;
+};
+
+export const getSingleHistory = async (
+  tvdb_id = 0,
+  tmdb_id = 0,
+  season = 0,
+  episode = 0,
+) => {
+  const user_id = await retrieveUser('user_id');
+  const media_type = tvdb_id === 0 ? 'movie' : 'tv';
+
+  const req = await fetch(
+    `${M4D_API_URL}/history?id=${user_id}&tmdbId=${tmdb_id}&tvdbId=${tvdb_id}&season=${season}&episode=${episode}&media_type=${media_type}&one=true`,
+  );
+  const res = await req.json();
+
+  return res;
 };

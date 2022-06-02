@@ -36,7 +36,7 @@ const MoviesScreen = ({navigation}) => {
 
     return (
       <View>
-        <ActivityIndicator></ActivityIndicator>
+        <ActivityIndicator />
       </View>
     );
   }
@@ -52,7 +52,7 @@ const MoviesScreen = ({navigation}) => {
     if (!movies) {
       return (
         <View>
-          <ActivityIndicator></ActivityIndicator>
+          <ActivityIndicator />
         </View>
       );
     }
@@ -79,7 +79,7 @@ const MoviesScreen = ({navigation}) => {
         flex: 1,
       }}>
       <View style={styles.list}>
-        <GenreView data={genres}></GenreView>
+        <GenreView data={genres} />
       </View>
 
       <GenreResults
@@ -89,8 +89,9 @@ const MoviesScreen = ({navigation}) => {
           console.log(data);
           setEndReached(data);
           setLoadingData(true);
-        }}></GenreResults>
-      {loadingData && <ActivityIndicator></ActivityIndicator>}
+        }}
+      />
+      {loadingData && <ActivityIndicator />}
     </LinearGradient>
   );
 };

@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
@@ -91,7 +92,7 @@ const HomeScreen = ({navigation}) => {
   if (isLoadingGenre || isLoadingTrending) {
     return (
       <View>
-        <ActivityIndicator></ActivityIndicator>
+        <ActivityIndicator />
       </View>
     );
   }
@@ -167,8 +168,9 @@ const HomeScreen = ({navigation}) => {
             }}
             onChangeText={data => {
               setSearchTerm(data);
-            }}></TextInput>
-          <Icon name="search" style={styles.icon}></Icon>
+            }}
+          />
+          <Icon name="search" style={styles.icon} />
         </TouchableOpacity>
       </View>
       <ScrollView>

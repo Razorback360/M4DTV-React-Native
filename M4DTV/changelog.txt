@@ -1,0 +1,4 @@
+subtitles available in 8 colors (white, cyan, red, green, yellow, magenta, blue, ochre)
+subtitles available in 5 sizes (20%, 40%, 60%, 80%, 100%)
+redesigned the submenus (changed the color and size)
+add options for fast forward & rewind (10s, 30s, 1m, 69s, 420s)
