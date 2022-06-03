@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
@@ -83,7 +84,7 @@ const WatchlistScreen = ({navigation}) => {
   if (isLoadingWatchlist) {
     return (
       <View>
-        <ActivityIndicator></ActivityIndicator>
+        <ActivityIndicator />
       </View>
     );
   }
@@ -156,8 +157,9 @@ const WatchlistScreen = ({navigation}) => {
             }}
             onChangeText={data => {
               setSearchTerm(data);
-            }}></TextInput>
-          <Icon name="search" style={styles.icon}></Icon>
+            }}
+          />
+          <Icon name="search" style={styles.icon} />
         </TouchableOpacity>
       </View>
       <GenreResults

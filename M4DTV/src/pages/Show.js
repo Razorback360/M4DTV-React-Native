@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
@@ -189,7 +190,8 @@ const ShowScreen = ({navigation, route}) => {
               uri: `https://image.tmdb.org/t/p/original${show.poster_path}`,
             }}
             style={styles.poster}
-            resizeMode="contain"></Image>
+            resizeMode="contain"
+          />
         </View>
         <View style={styles.informationContainer}>
           <View style={styles.logoContainer}>
@@ -203,22 +205,23 @@ const ShowScreen = ({navigation, route}) => {
                   }`,
                 }}
                 style={styles.logo}
-                resizeMode="contain"></Image>
+                resizeMode="contain"
+              />
             )}
             {!show.logo && <Text style={{color: '#FFFFFF'}}>{show.name}</Text>}
           </View>
           <View style={styles.extrasContainer}>
-            <Icon name="calendar-outline" style={styles.icons}></Icon>
+            <Icon name="calendar-outline" style={styles.icons} />
             <Text style={styles.extras}>
               {' '}
               {show.first_air_date.slice(0, 4)} •{' '}
             </Text>
-            <Icon name="clock-time-four-outline" style={styles.icons}></Icon>
+            <Icon name="clock-time-four-outline" style={styles.icons} />
             <Text style={styles.extras}>
               {' '}
               {Math.floor(show.runtime / 60)}h{show.runtime % 60}m each •{' '}
             </Text>
-            <Icon name="star" style={styles.icons}></Icon>
+            <Icon name="star" style={styles.icons} />
             <Text style={styles.extras}> {show.vote_average}</Text>
           </View>
           <View style={styles.buttonContainer}>
@@ -240,7 +243,8 @@ const ShowScreen = ({navigation, route}) => {
                     color: '#000000',
                     fontSize: width * 0.0197,
                   }}
-                  name="play-circle"></Icon>
+                  name="play-circle"
+                />
                 <Text
                   style={{
                     flexDirection: 'column',
@@ -269,7 +273,8 @@ const ShowScreen = ({navigation, route}) => {
                     color: '#000000',
                     fontSize: width * 0.0197,
                   }}
-                  name="video-vintage"></Icon>
+                  name="video-vintage"
+                />
                 <Text
                   style={{
                     flexDirection: 'column',
@@ -301,7 +306,8 @@ const ShowScreen = ({navigation, route}) => {
                       color: '#000000',
                       fontSize: width * 0.0197,
                     }}
-                    name="playlist-plus"></Icon>
+                    name="playlist-plus"
+                  />
                 )}
                 {watchlist && (
                   <Icon
@@ -310,7 +316,8 @@ const ShowScreen = ({navigation, route}) => {
                       color: '#000000',
                       fontSize: width * 0.0197,
                     }}
-                    name="playlist-remove"></Icon>
+                    name="playlist-remove"
+                  />
                 )}
               </View>
             </TouchableOpacity>
@@ -365,15 +372,19 @@ const ShowScreen = ({navigation, route}) => {
                   data={show.seasons}
                   onChange={data => {
                     setSeason(data);
-                  }}></SeasonList>
+                  }}
+                />
               </View>
               <EpisodeList
                 data={show.episodes.filter(s => s.seasonNumber === season)}
                 imagestyle={styles.tinyLogo}
+                showTitle={show.name}
+                showYear={show.first_air_date.slice(0, 4)}
                 season={season}
                 onChange={data => {
                   setStreamModalVisible(data);
-                }}></EpisodeList>
+                }}
+              />
             </View>
           </ImageBackground>
         </Modal>

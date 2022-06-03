@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import PropTypes from 'prop-types';
 import React, {PureComponent} from 'react';
 import {
@@ -23,9 +24,11 @@ class EpisodeList extends PureComponent {
     season: PropTypes.number.isRequired,
   };
   render = () => {
-    const {data, imagestyle, navigation, season} = this.props;
+    const {data, imagestyle, navigation, season, showTitle, showYear} =
+      this.props;
     const width = Dimensions.get('window').width;
     const height = Dimensions.get('window').height;
+    console.log(showTitle, showYear);
     const AddItem = ({item}) => {
       if (item.seasonNumber === season) {
         return (
@@ -33,12 +36,15 @@ class EpisodeList extends PureComponent {
             activeOpacity={0.5}
             onPress={() => {
               if (item.available) {
-                console.log(item.tvdb_id);
+                console.log(item);
                 navigation.navigate('Stream', {
                   tvdb_id: item.tvdb_id,
                   season: item.seasonNumber,
                   episode: item.episodeNumber,
                   isShow: true,
+                  mediaTitle: showTitle,
+                  type: 'tv',
+                  mediaYear: showYear,
                 });
               } else {
                 console.log('Not available');

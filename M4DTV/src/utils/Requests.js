@@ -1,5 +1,6 @@
 import {TMDB_API_KEY, M4D_API_URL} from '../../Secrets';
 import {retrieveUser} from './Storage';
+import axios from 'axios';
 
 export const getMovie = async movie_id => {
   const user_id = await retrieveUser('user_id');
@@ -77,20 +78,38 @@ export const getShow = async show_id => {
     overview: jsondata.overview,
     inWatchlist: watchlistjsondata.isInWatchlist,
   };
-
   return final_data;
 };
 
-export const getSubtitles = async () => {
-  const req = await fetch(
-    `${M4D_API_URL}/subtitles?t=movie&q=red&language=en&id=cl0bzlsor5111571nm684agflvl`,
-  ).catch(err => {
-    console.error(`error fetchin subtitles ${err}`);
-  });
-  const jsondata = await req.json();
-  console.log(`getSubtitles jsondata log${jsondata.toString()}`);
-  return jsondata;
+export const getSubtitles = async (
+  mediaTitle,
+  mediaYear,
+  season,
+  episode,
+  isShow,
+) => {
+  const user_id = await retrieveUser('user_id');
+
+  const req = await axios
+    .get(
+      isShow
+        ? `${M4D_API_URL}/subtitles?t=tv&q=${mediaTitle}&season=${season}&episode=${episode}&language=en&year=${mediaYear}&id=${user_id}`
+        : `${M4D_API_URL}/subtitles?t=movie&q=${mediaTitle}&language=en&year=${mediaYear}&id=${user_id}`,
+    )
+    .catch(err => {
+      console.error(
+        `error fetchin subtitles ${err.message}`,
+        '\n ',
+        isShow
+          ? `${M4D_API_URL}/subtitles?t=tv&q=${mediaTitle}&season=${season}&episode=${episode}&language=en&year=${mediaYear}&id=${user_id}`
+          : `${M4D_API_URL}/subtitles?t=movie&q=${mediaTitle}&language=en&year=${mediaYear}&id=${user_id}`,
+      );
+    });
+
+  console.log('getSubtitles req log: ', req);
+  return req;
 };
+
 export const getTrending = async (page = 1) => {
   const req = await fetch(
     `https://api.themoviedb.org/3/trending/all/day?api_key=${TMDB_API_KEY}&page=${page}`,
@@ -151,9 +170,9 @@ export const getGenresShows = async () => {
   return jsondata;
 };
 
-export const getSearchResults = async (query, page = 1) => {
+export const getSearchResults = async (mediaTitle, page = 1) => {
   const req = await fetch(
-    `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&language=en-US&include_adult=true&query=${query}&page=${page}`,
+    `https://api.themoviedb.org/3/search/multi?api_key=${TMDB_API_KEY}&language=en-US&include_adult=true&mediaTitle=${mediaTitle}&page=${page}`,
   );
   const jsondata = await req.json();
   return jsondata;

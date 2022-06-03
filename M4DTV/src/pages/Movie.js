@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
@@ -170,7 +171,8 @@ const MovieScreen = ({navigation, route}) => {
               uri: `https://image.tmdb.org/t/p/original${movie.poster_path}`,
             }}
             style={styles.poster}
-            resizeMode="contain"></Image>
+            resizeMode="contain"
+          />
         </View>
         <View style={styles.informationContainer}>
           <View style={styles.logoContainer}>
@@ -184,24 +186,25 @@ const MovieScreen = ({navigation, route}) => {
                   }`,
                 }}
                 style={styles.logo}
-                resizeMode="contain"></Image>
+                resizeMode="contain"
+              />
             )}
             {movie.images.logos.length === 0 && (
               <Text style={{color: '#FFFFFF'}}>{movie.title}</Text>
             )}
           </View>
           <View style={styles.extrasContainer}>
-            <Icon name="calendar-outline" style={styles.icons}></Icon>
+            <Icon name="calendar-outline" style={styles.icons} />
             <Text style={styles.extras}>
               {' '}
               {movie.release_date.slice(0, 4)} •{' '}
             </Text>
-            <Icon name="clock-time-four-outline" style={styles.icons}></Icon>
+            <Icon name="clock-time-four-outline" style={styles.icons} />
             <Text style={styles.extras}>
               {' '}
               {Math.floor(movie.runtime / 60)}h{movie.runtime % 60}m •{' '}
             </Text>
-            <Icon name="star" style={styles.icons}></Icon>
+            <Icon name="star" style={styles.icons} />
             <Text style={styles.extras}> {movie.vote_average}</Text>
           </View>
           <View style={styles.buttonContainer}>
@@ -210,6 +213,8 @@ const MovieScreen = ({navigation, route}) => {
                 navigation.navigate('Stream', {
                   tmdb_id: movie.id,
                   isShow: false,
+                  mediaTitle: movie.title,
+                  mediaYear: movie.release_date.slice(0, 4),
                 });
               }}
               style={styles.button}
@@ -227,7 +232,8 @@ const MovieScreen = ({navigation, route}) => {
                     color: '#000000',
                     fontSize: width * 0.0197,
                   }}
-                  name={!movie.available ? 'eye-off' : 'play-circle'}></Icon>
+                  name={!movie.available ? 'eye-off' : 'play-circle'}
+                />
                 <Text
                   style={{
                     flexDirection: 'column',
@@ -254,7 +260,8 @@ const MovieScreen = ({navigation, route}) => {
                     color: '#000000',
                     fontSize: width * 0.0197,
                   }}
-                  name="video-vintage"></Icon>
+                  name="video-vintage"
+                />
                 <Text
                   style={{
                     flexDirection: 'column',
@@ -288,7 +295,8 @@ const MovieScreen = ({navigation, route}) => {
                       color: '#000000',
                       fontSize: width * 0.0197,
                     }}
-                    name="playlist-plus"></Icon>
+                    name="playlist-plus"
+                  />
                 )}
                 {watchlist && (
                   <Icon
@@ -297,7 +305,8 @@ const MovieScreen = ({navigation, route}) => {
                       color: '#000000',
                       fontSize: width * 0.0197,
                     }}
-                    name="playlist-remove"></Icon>
+                    name="playlist-remove"
+                  />
                 )}
               </View>
             </TouchableOpacity>

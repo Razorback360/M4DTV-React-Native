@@ -17,17 +17,16 @@ import {
   getStreamTV,
   addHistory,
   getSingleHistory,
-  getSubtitles,
 } from '../utils/Requests';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 import {Video} from 'expo-av';
 import {useKeepAwake} from 'expo-keep-awake';
 import * as Progress from 'react-native-progress';
 import Subtitles from '../utils/Subtitles';
-import {M4D_API_URL} from '../../Secrets';
 
 const StreamScreen = ({navigation, route}) => {
-  const {tmdb_id, isShow, tvdb_id, season, episode} = route.params;
+  const {tmdb_id, isShow, tvdb_id, season, episode, mediaTitle, mediaYear} =
+    route.params;
   const [isLoadingParams, setisLoadingParams] = useState(true); // Check to see if parameters for stream are loaded or not yet
   const [isLoadingStream, setIsLoadingStream] = useState(true); // Check to see if stream is loaded or not yet
   const video = useRef(null); // Used to control Video player.
@@ -86,7 +85,7 @@ const StreamScreen = ({navigation, route}) => {
           video.current.playAsync();
           setIsPaused(false);
         });
-        //setHasSeeked(hasSeeked + 1);
+        setHasSeeked(hasSeeked + 1);
       }
 
       // Fast forward 10 seconds from current position.
@@ -100,7 +99,7 @@ const StreamScreen = ({navigation, route}) => {
           video.current.playAsync();
           setIsPaused(false);
         });
-        //setHasSeeked(hasSeeked + 1);
+        setHasSeeked(hasSeeked + 1);
       }
 
       // Play/Pause video player (Select button).
@@ -126,7 +125,6 @@ const StreamScreen = ({navigation, route}) => {
   const size = useWindowDimensions();
   const width = size.width;
   const height = size.height;
-  const selectedSubtitle = `${M4D_API_URL}/subtitles?t=movie&q=The Lost City&language=en&year=2022&id=cl0bzlsor5111571nm684agflvl`;
 
   const styles = StyleSheet.create({
     container: {
@@ -276,7 +274,6 @@ const StreamScreen = ({navigation, route}) => {
   }
 
   if (isShow && isLoadingParams && isLoadingStream && !tutorialVisible) {
-    const {season, episode} = route.params;
     setisLoadingParams(false);
     setIsLoadingStream(false);
     getStreamTV(tvdb_id, season, episode).then(res => {
@@ -324,7 +321,7 @@ const StreamScreen = ({navigation, route}) => {
       seconds,
     )}`;
   };
-  /* const modifyHistory = async () => {
+  const modifyHistory = async () => {
     if (isShow) {
       await addHistory(tvdb_id, tmdb_id, season, episode, progress * 100);
     } else {
@@ -334,20 +331,16 @@ const StreamScreen = ({navigation, route}) => {
 
   if (status.isLoaded && !durationSet && !tutorialVisible) {
     if (isShow) {
-      const data = getSingleHistory(tvdb_id, tmdb_id, season, episode).then(
-        data => {
-          data.percentage !== null
-            ? video.current
-                .setPositionAsync(
-                  status.durationMillis * (data.percentage / 100),
-                )
-                .then(() => {})
-            : null;
-          setDurationSet(true);
-        },
-      );
+      getSingleHistory(tvdb_id, tmdb_id, season, episode).then(data => {
+        data.percentage !== null
+          ? video.current
+              .setPositionAsync(status.durationMillis * (data.percentage / 100))
+              .then(() => {})
+          : null;
+        setDurationSet(true);
+      });
     } else {
-      const data = getSingleHistory(0, tmdb_id, 0, 0).then(data => {
+      getSingleHistory(0, tmdb_id, 0, 0).then(data => {
         data.percentage !== null
           ? video.current
               .setPositionAsync(status.durationMillis * (data.percentage / 100))
@@ -356,7 +349,7 @@ const StreamScreen = ({navigation, route}) => {
         setDurationSet(true);
       });
     }
-  } */
+  }
 
   return (
     <View style={styles.container}>
@@ -377,21 +370,23 @@ const StreamScreen = ({navigation, route}) => {
           onPlaybackStatusUpdate={async Status => {
             setStatus(() => Status);
             setProgress(Status.positionMillis / Status.durationMillis);
-            //console.log(progress);
-            /* if (durationSet && !tutorialVisible) {
+            if (durationSet && !tutorialVisible) {
               await modifyHistory();
-            } */
+            }
           }}
         />
       </TouchableOpacity>
       <View style={styles.subtitlesContainerStyle}>
         {subtitlesVisible && (
-          <Subtitles
+          <Subtitles // here lies the subtitles file please look here while searching for the subtitle file
             currentTime={status.positionMillis}
-            selectedSubtitle={selectedSubtitle}
-            //selectedSubtitle={getSubtitles()}
-            //style={styles.subtitlesTextStyle}
-            //hasSeeked={hasSeeked}
+            mediaTitle={mediaTitle}
+            mediaYear={mediaYear}
+            isShow={isShow}
+            hasSeeked={hasSeeked}
+            textStyle={styles.subtitlesTextStyle}
+            season={season}
+            episode={episode}
           />
         )}
       </View>

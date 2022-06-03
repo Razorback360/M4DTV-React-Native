@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
@@ -48,7 +49,7 @@ const ShowsScreen = ({navigation}) => {
 
     return (
       <View>
-        <ActivityIndicator></ActivityIndicator>
+        <ActivityIndicator />
       </View>
     );
   }
@@ -64,9 +65,9 @@ const ShowsScreen = ({navigation}) => {
       return (
         <View>
           <View style={styles.list}>
-            <GenreView data={genres}></GenreView>
+            <GenreView data={genres} />
           </View>
-          <ActivityIndicator></ActivityIndicator>
+          <ActivityIndicator />
         </View>
       );
     }
@@ -85,8 +86,9 @@ const ShowsScreen = ({navigation}) => {
             setGenre(data);
             console.log(data);
             setShows(null);
-          }}></GenreView>
-        {!shows && <ActivityIndicator></ActivityIndicator>}
+          }}
+        />
+        {!shows && <ActivityIndicator />}
       </View>
 
       <GenreResults
@@ -96,8 +98,9 @@ const ShowsScreen = ({navigation}) => {
           console.log(data);
           setEndReached(data);
           setLoadingData(true);
-        }}></GenreResults>
-      {loadingData && <ActivityIndicator></ActivityIndicator>}
+        }}
+      />
+      {loadingData && <ActivityIndicator />}
     </LinearGradient>
   );
 };

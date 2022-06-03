@@ -1,3 +1,4 @@
+/* eslint-disable react-native/no-inline-styles */
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
@@ -7,7 +8,6 @@ import {
   ActivityIndicator,
   TextInput,
   TouchableOpacity,
-  ScrollView,
 } from 'react-native';
 import LinearGradient from 'react-native-linear-gradient';
 import Icon from 'react-native-vector-icons/MaterialIcons';
@@ -81,7 +81,7 @@ const HistoryScreen = ({navigation}) => {
   if (isLoadingHistory) {
     return (
       <View>
-        <ActivityIndicator></ActivityIndicator>
+        <ActivityIndicator />
       </View>
     );
   }
@@ -154,8 +154,9 @@ const HistoryScreen = ({navigation}) => {
             }}
             onChangeText={data => {
               setSearchTerm(data);
-            }}></TextInput>
-          <Icon name="search" style={styles.icon}></Icon>
+            }}
+          />
+          <Icon name="search" style={styles.icon} />
         </TouchableOpacity>
       </View>
       <GenreResults
