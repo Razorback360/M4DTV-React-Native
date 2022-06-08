@@ -23,6 +23,8 @@ target 'M4DTV' do
     :app_path => "#{Pod::Config.instance.installation_root}/.."
   )
 
+  pod 'react-native-webview', :path => '../node_modules/react-native-webview'
+
   target 'M4DTVTests' do
     inherit! :complete
     # Pods for testing

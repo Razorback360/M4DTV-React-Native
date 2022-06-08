@@ -1,5 +1,5 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useRef} from 'react';
+import React, {useState, useRef, useEffect} from 'react';
 import {
   useWindowDimensions,
   Text,
@@ -19,10 +19,16 @@ import {
   getSingleHistory,
 } from '../utils/Requests';
 import Icon from 'react-native-vector-icons/MaterialIcons';
-import {Video} from 'expo-av';
+//import {Video} from 'expo-av';
 import {useKeepAwake} from 'expo-keep-awake';
 import * as Progress from 'react-native-progress';
 import Subtitles from '../utils/Subtitles';
+import VideoPlayer from 'react-native-video-controls-subtitle';
+import Video from 'react-native-video';
+import {WebView} from 'react-native-webview';
+import axios from 'axios';
+import vttToJson from 'vtt-to-json';
+import {getSubtitles} from '../utils/Requests';
 
 const StreamScreen = ({navigation, route}) => {
   const {tmdb_id, isShow, tvdb_id, season, episode, mediaTitle, mediaYear} =
@@ -38,11 +44,12 @@ const StreamScreen = ({navigation, route}) => {
   const [tutorialVisible, setTutorialVisible] = useState(false);
   const [status, setStatus] = useState({}); // Gets video status for use with video overlay
   const [progress, setProgress] = useState(0); // Video progress
-  const [statusOverlayVisible, setStatusOverlayVisible] = useState(0); // Sets if progress overlay is visible or not
+  const [disableOverlayVisible, setDisableOverlayVisible] = useState(false); // Sets if progress overlay is visible or not
   const [durationSet, setDurationSet] = useState(false);
   const [seekingMultiplier, setSeekingMultiplier] = useState(1);
   const [isMenuVisible, setIsMenuVisible] = useState(false); // checks if any menu is visible. used to change subtitles position when a menu is visible (totaly useless)
   const [hasSeeked, setHasSeeked] = useState(0); // Checks if video is seeked; used to help sync subtitles
+  const [subtitles, setSubtitles] = useState([]);
   const [subtitlesVisible, setSubtitlesVisible] = useState(true); // Checks and Determines subtitle visibility
   const [subtitlesColor, setSubtitlesColor] = useState('#FFFFFF'); // Checks and Determines subtitles' color
   const [subtitlesMenuVisible, setSubtitlesMenuVisible] = useState(false); // Checks and Determines if Subtitles submenu is visible or not
@@ -61,29 +68,24 @@ const StreamScreen = ({navigation, route}) => {
       if (evt.eventType === 'down' && !settingsVisible) {
         setSettingVisible(true);
         setIsMenuVisible(true);
-        if (isPaused === false) {
-          video.current.pauseAsync();
+        if (!isPaused) {
           setIsPaused(true);
         }
       }
 
       // Show/Hide video player progress.
       else if (evt.eventType === 'up' && !settingsVisible) {
-        statusOverlayVisible === 1
-          ? setStatusOverlayVisible(0)
-          : setStatusOverlayVisible(1);
+        !disableOverlayVisible
+          ? setDisableOverlayVisible(true)
+          : setDisableOverlayVisible(false);
       }
 
       // Rewind 10 seconds from current position.
       else if (evt.eventType === 'left' && !settingsVisible) {
         video.current.getStatusAsync().then(data => {
-          video.current.pauseAsync();
-          setIsPaused(true);
           video.current
             .setPositionAsync(data.positionMillis - 10000 * seekingMultiplier)
             .then(() => {});
-          video.current.playAsync();
-          setIsPaused(false);
         });
         setHasSeeked(hasSeeked + 1);
       }
@@ -91,37 +93,82 @@ const StreamScreen = ({navigation, route}) => {
       // Fast forward 10 seconds from current position.
       else if (evt.eventType === 'right' && !settingsVisible) {
         video.current.getStatusAsync().then(data => {
-          video.current.pauseAsync();
-          setIsPaused(true);
           video.current
             .setPositionAsync(data.positionMillis + 10000 * seekingMultiplier)
             .then(() => {});
-          video.current.playAsync();
-          setIsPaused(false);
         });
         setHasSeeked(hasSeeked + 1);
       }
 
       // Play/Pause video player (Select button).
       else if (evt.eventType === 'select' && !settingsVisible) {
-        isPaused === true
-          ? video.current.playAsync()
-          : video.current.pauseAsync();
-        isPaused === true ? setIsPaused(false) : setIsPaused(true);
+        isPaused
+          ? setDisableOverlayVisible(true)
+          : setDisableOverlayVisible(false);
+        isPaused ? setIsPaused(false) : setIsPaused(true);
       }
 
       // Play/Pause video player (Play/Pause button).
       else if (evt.eventType === 'playPause' && !settingsVisible) {
-        isPaused === true
-          ? video.current.playAsync()
-          : video.current.pauseAsync();
-        isPaused === true ? setIsPaused(false) : setIsPaused(true);
+        isPaused
+          ? setDisableOverlayVisible(true)
+          : setDisableOverlayVisible(false);
+        isPaused ? setIsPaused(false) : setIsPaused(true);
       }
     }
   };
 
+  const convertMsToTime = milliseconds => {
+    //converts millieseconds to hh:mm:ss,SSS
+    const padTo2Digits = num => {
+      return num.toString().padStart(2, '0');
+    };
+    let seconds = Math.floor(milliseconds / 1000);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+
+    milliseconds = milliseconds % 1000;
+    seconds = seconds % 60;
+    minutes = minutes % 60;
+
+    return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(
+      seconds,
+    )},${padTo2Digits(milliseconds)}`;
+  };
+  useEffect(() => {
+    getSubtitles(mediaTitle, mediaYear, season, episode, isShow).then(
+      response => {
+        const openedSubtitle = response.data;
+
+        //conversion:
+        vttToJson(openedSubtitle).then(parsedSubtitle => {
+          let result = [];
+          //mapping
+          parsedSubtitle.map(subtitle => {
+            // For some reason this library adds the index of the subtitle at the end of the part, so we cut it
+
+            result.push({
+              startTime: convertMsToTime(subtitle.start),
+              endTime: convertMsToTime(subtitle.end),
+              text: subtitle.part.slice(
+                0,
+                subtitle.part.length -
+                  subtitle.part.split(' ')[subtitle.part.split(' ').length - 1]
+                    .length,
+              ),
+            });
+          });
+          console.log(result);
+          setSubtitles(result);
+        });
+      },
+    );
+  }, [episode, isShow, mediaTitle, mediaYear, season]);
+
   useTVEventHandler(myTVEventHandler);
   useKeepAwake();
+
+  //setInterval(updateStatus, 1000);
   const size = useWindowDimensions();
   const width = size.width;
   const height = size.height;
@@ -129,6 +176,7 @@ const StreamScreen = ({navigation, route}) => {
   const styles = StyleSheet.create({
     container: {
       flex: 1,
+      flexGrow: 1,
       justifyContent: 'center',
       backgroundColor: '#000000',
     },
@@ -151,9 +199,14 @@ const StreamScreen = ({navigation, route}) => {
       marginRight: 11,
     },
     video: {
-      alignSelf: 'center',
+      /* alignSelf: 'center',
       width: '100%',
-      height: '100%',
+      height: '100%', */
+      position: 'absolute',
+      top: 0,
+      left: 0,
+      bottom: 0,
+      right: 0,
     },
     buttons: {
       flexDirection: 'row',
@@ -198,13 +251,13 @@ const StreamScreen = ({navigation, route}) => {
       marginTop: 5,
       fontSize: width * 0.02,
     },
-    overlay: {
-      backgroundColor: 'rgba(0, 0, 0, 0.9)',
-      top: '90%',
-      opacity: statusOverlayVisible,
+    /* overlay: {
+      backgroundColor: 'rgba(0, 0, 0, 0)',
+      bottom: '15%',
+      opacity: disableOverlayVisible,
       position: 'absolute',
-      left: '4%',
-    },
+      left: '1%',
+    }, */
     subtitlesContainerStyle: {
       // a view that is as wide as the screen and as tall as the text.
       // is located in the lower half of the screen
@@ -306,11 +359,12 @@ const StreamScreen = ({navigation, route}) => {
   const AS = `https://as.movies4discord.xyz/?viewkey=${key}`;
   const US = `https://us.movies4discord.xyz/?viewkey=${key}`;
 
-  const convertMsToTime = milliseconds => {
+  const convertSecondsToTime = seconds => {
+    // converts seconds to hh:mm:ss
     const padTo2Digits = num => {
       return num.toString().padStart(2, '0');
     };
-    let seconds = Math.floor(milliseconds / 1000);
+    seconds = Math.floor(seconds);
     let minutes = Math.floor(seconds / 60);
     let hours = Math.floor(minutes / 60);
 
@@ -329,7 +383,7 @@ const StreamScreen = ({navigation, route}) => {
     }
   };
 
-  if (status.isLoaded && !durationSet && !tutorialVisible) {
+  /* if (status.isLoaded && !durationSet && !tutorialVisible) {
     if (isShow) {
       getSingleHistory(tvdb_id, tmdb_id, season, episode).then(data => {
         data.percentage !== null
@@ -349,72 +403,37 @@ const StreamScreen = ({navigation, route}) => {
         setDurationSet(true);
       });
     }
-  }
+  } */
+
+  // https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4
+  // https://rinzry2.rinzry2.workers.dev/0:/Movies/The%20Lost%20City%20(2022)/The%20Lost%20City%20(2022)%20WEBDL-1080p%208bit%20h264%20AAC%202.0%20-CMRG.mp4
+  // https://sample-videos.com/video123/mkv/720/big_buck_bunny_720p_2mb.mkv
 
   return (
     <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => {}}
-        disabled={isdisabledOpacity}
-        activeOpacity={1}
-        hasTVPreferredFocus={true}>
-        <Video
-          ref={video}
-          style={styles.video}
-          source={{
-            uri: EU,
-          }}
-          useNativeControls={false}
-          shouldPlay={true}
-          resizeMode="contain"
-          onPlaybackStatusUpdate={async Status => {
-            setStatus(() => Status);
-            setProgress(Status.positionMillis / Status.durationMillis);
-            if (durationSet && !tutorialVisible) {
-              await modifyHistory();
-            }
-          }}
-        />
-      </TouchableOpacity>
-      <View style={styles.subtitlesContainerStyle}>
-        {subtitlesVisible && (
-          <Subtitles // here lies the subtitles file please look here while searching for the subtitle file
-            currentTime={status.positionMillis}
-            mediaTitle={mediaTitle}
-            mediaYear={mediaYear}
-            isShow={isShow}
-            hasSeeked={hasSeeked}
-            textStyle={styles.subtitlesTextStyle}
-            season={season}
-            episode={episode}
-          />
-        )}
-      </View>
-      <View style={styles.overlay}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'center',
-            alignItems: 'center',
-            backgroundColor: 'rgba(0, 0, 0, 0.9)',
-          }}>
-          <Text style={{color: '#FFFFFF'}}>
-            {convertMsToTime(status.positionMillis)}
-          </Text>
-          {!isNaN(progress) && (
-            <Progress.Bar
-              width={width * 0.8}
-              borderWidth={1}
-              unfilledColor={'#343434'}
-              borderRadius={0}
-              progress={parseFloat(progress.toFixed(2))}
-            />
-          )}
-          <Text style={{color: '#FFFFFF'}}>
-            {convertMsToTime(status.durationMillis)}
-          </Text>
-        </View>
-      </View>
+      <VideoPlayer
+        ref={video}
+        style={styles.video}
+        source={{
+          uri: AS,
+        }}
+        resizeMode={'contain'}
+        navigator={navigation}
+        disableFullscreen={true}
+        disableVolume={true}
+        disableBack={true}
+        disableSeekbar={disableOverlayVisible}
+        disableTimer={disableOverlayVisible}
+        disablePlayPause={disableOverlayVisible}
+        paused={isPaused}
+        onProgress={async Status => {
+          setStatus(Status);
+          setProgress(Status.currentTime / Status.seekableDuration);
+        }}
+        subtitle={subtitles}
+        subtitleContainerStyle={styles.subtitlesContainerStyle}
+        subtitleStyle={styles.subtitlesTextStyle}
+      />
       <Modal // main menu used to access other submenus. also changes subtitles' position to enable better visibility
         animationType="slide"
         transparent={true}
@@ -423,7 +442,6 @@ const StreamScreen = ({navigation, route}) => {
           setSettingVisible(false);
           setIsPaused(false);
           setIsMenuVisible(false);
-          video.current.playAsync();
         }}>
         <View style={styles.settingsMain}>
           <ScrollView>
@@ -774,3 +792,71 @@ const StreamScreen = ({navigation, route}) => {
 };
 
 export default StreamScreen;
+/*   */
+// <WebView source={{uri: EU}} style={styles.video} />
+
+/*  <Video
+          ref={video}
+          style={styles.video}
+          source={{
+            uri: EU,
+          }}
+          useNativeControls
+          shouldPlay={true}
+          resizeMode="contain"
+          onPlaybackStatusUpdate={async status => {
+            setStatus(status);
+            setProgress(status.positionMillis / status.durationMillis);
+            //console.log(progress);
+            if (durationSet && !tutorialVisible) {
+              await modifyHistory();
+            }
+          }}
+          progressUpdateIntervalMillis={200}
+          on
+        /> */
+
+/* <View style={styles.subtitlesContainerStyle}>
+        {subtitlesVisible && video != null && (
+          //<Text style={styles.subtitlesTextStyle}>
+          <Subtitles // here lies the subtitles file please look here while searching for the subtitle file
+            currentTime={videoTime}
+            mediaTitle={mediaTitle}
+            mediaYear={mediaYear}
+            isShow={isShow}
+            hasSeeked={hasSeeked}
+            textStyle={styles.subtitlesTextStyle}
+            season={season}
+            episode={episode}
+          />
+          //</Text>
+        )}
+      </View> */
+
+/* <View style={styles.overlay}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: 'rgba(0, 0, 0, 0.1)',
+            padding: 10,
+            borderRadius: 10,
+          }}>
+          <Text style={{color: '#FFFFFF', padding: 10}}>
+            {convertSecondsToTime(status.currentTime)}
+          </Text>
+          {!isNaN(progress) && (
+            <Progress.Bar
+              width={width * 0.8}
+              borderWidth={1}
+              unfilledColor={'#343434'}
+              borderRadius={2}
+              progress={parseFloat(progress.toFixed(2))}
+            />
+          )}
+          <Text style={{color: '#FFFFFF', padding: 10}}>
+            {convertSecondsToTime(status.seekableDuration)}
+          </Text>
+        </View>
+      </View> */
