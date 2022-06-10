@@ -15,18 +15,18 @@ import {
 import {
   getStreamMovie,
   getStreamTV,
-  addHistory,
-  getSingleHistory,
+  // addHistory,
+  // getSingleHistory,
 } from '../utils/Requests';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 //import {Video} from 'expo-av';
 import {useKeepAwake} from 'expo-keep-awake';
-import * as Progress from 'react-native-progress';
+// import * as Progress from 'react-native-progress';
 import Subtitles from '../utils/Subtitles';
-import VideoPlayer from 'react-native-video-controls-subtitle';
-import Video from 'react-native-video';
-import {WebView} from 'react-native-webview';
-import axios from 'axios';
+import VideoPlayer from '../utils/VideoPlayer';
+// import Video from 'react-native-video';
+// import {WebView} from 'react-native-webview';
+// import axios from 'axios';
 import vttToJson from 'vtt-to-json';
 import {getSubtitles} from '../utils/Requests';
 
@@ -38,14 +38,14 @@ const StreamScreen = ({navigation, route}) => {
   const video = useRef(null); // Used to control Video player.
   const [settingsVisible, setSettingVisible] = useState(false); // Determines if settings menu is visible or not
   const [serversVisible, setServersVisible] = useState(false); // Determines if servers submenu is visible or not
-  const [isdisabledOpacity, setIsDisabledOpacity] = useState(false); // :shrug: Later use
+  // const [isdisabledOpacity, setIsDisabledOpacity] = useState(false); // :shrug: Later use
   const [isPaused, setIsPaused] = useState(false); // Determines if video player is paused
   const [key, setKey] = useState(null); // Sets streaming key to get the stream from the server
   const [tutorialVisible, setTutorialVisible] = useState(false);
   const [status, setStatus] = useState({}); // Gets video status for use with video overlay
-  const [progress, setProgress] = useState(0); // Video progress
+  // const [progress, setProgress] = useState(0); // Video progress
   const [disableOverlayVisible, setDisableOverlayVisible] = useState(false); // Sets if progress overlay is visible or not
-  const [durationSet, setDurationSet] = useState(false);
+  // const [durationSet, setDurationSet] = useState(false);
   const [seekingMultiplier, setSeekingMultiplier] = useState(1);
   const [isMenuVisible, setIsMenuVisible] = useState(false); // checks if any menu is visible. used to change subtitles position when a menu is visible (totaly useless)
   const [hasSeeked, setHasSeeked] = useState(0); // Checks if video is seeked; used to help sync subtitles
@@ -82,22 +82,15 @@ const StreamScreen = ({navigation, route}) => {
 
       // Rewind 10 seconds from current position.
       else if (evt.eventType === 'left' && !settingsVisible) {
-        video.current.getStatusAsync().then(data => {
-          video.current
-            .setPositionAsync(data.positionMillis - 10000 * seekingMultiplier)
-            .then(() => {});
-        });
-        setHasSeeked(hasSeeked + 1);
+        video.player.seek(status.currentTime + 10 * seekingMultiplier);
+        // video.player.seek(status.currentTime + 10 * seekingMultiplier);
+        // hasSeeked === 0 ? setHasSeeked(1) : setHasSeeked(0);
       }
 
       // Fast forward 10 seconds from current position.
       else if (evt.eventType === 'right' && !settingsVisible) {
-        video.current.getStatusAsync().then(data => {
-          video.current
-            .setPositionAsync(data.positionMillis + 10000 * seekingMultiplier)
-            .then(() => {});
-        });
-        setHasSeeked(hasSeeked + 1);
+        video.player.seek(status.currentTime + 10 * seekingMultiplier);
+        // hasSeeked === 0 ? setHasSeeked(1) : setHasSeeked(0);
       }
 
       // Play/Pause video player (Select button).
@@ -118,23 +111,6 @@ const StreamScreen = ({navigation, route}) => {
     }
   };
 
-  const convertMsToTime = milliseconds => {
-    //converts millieseconds to hh:mm:ss,SSS
-    const padTo2Digits = num => {
-      return num.toString().padStart(2, '0');
-    };
-    let seconds = Math.floor(milliseconds / 1000);
-    let minutes = Math.floor(seconds / 60);
-    let hours = Math.floor(minutes / 60);
-
-    milliseconds = milliseconds % 1000;
-    seconds = seconds % 60;
-    minutes = minutes % 60;
-
-    return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(
-      seconds,
-    )},${padTo2Digits(milliseconds)}`;
-  };
   useEffect(() => {
     getSubtitles(mediaTitle, mediaYear, season, episode, isShow).then(
       response => {
@@ -148,14 +124,24 @@ const StreamScreen = ({navigation, route}) => {
             // For some reason this library adds the index of the subtitle at the end of the part, so we cut it
 
             result.push({
-              startTime: convertMsToTime(subtitle.start),
-              endTime: convertMsToTime(subtitle.end),
+              startTime: subtitle.start / 1000,
+              endTime: subtitle.end / 1000,
               text: subtitle.part.slice(
                 0,
                 subtitle.part.length -
                   subtitle.part.split(' ')[subtitle.part.split(' ').length - 1]
                     .length,
               ),
+              index:
+                parseInt(
+                  subtitle.part.slice(
+                    subtitle.part.length -
+                      subtitle.part.split(' ')[
+                        subtitle.part.split(' ').length - 1
+                      ].length,
+                  ),
+                  10,
+                ) - 1,
             });
           });
           console.log(result);
@@ -359,7 +345,7 @@ const StreamScreen = ({navigation, route}) => {
   const AS = `https://as.movies4discord.xyz/?viewkey=${key}`;
   const US = `https://us.movies4discord.xyz/?viewkey=${key}`;
 
-  const convertSecondsToTime = seconds => {
+  /*  const convertSecondsToTime = seconds => {
     // converts seconds to hh:mm:ss
     const padTo2Digits = num => {
       return num.toString().padStart(2, '0');
@@ -381,7 +367,7 @@ const StreamScreen = ({navigation, route}) => {
     } else {
       await addHistory(0, tmdb_id, 0, 0, progress * 100);
     }
-  };
+  }; */
 
   /* if (status.isLoaded && !durationSet && !tutorialVisible) {
     if (isShow) {
@@ -415,7 +401,7 @@ const StreamScreen = ({navigation, route}) => {
         ref={video}
         style={styles.video}
         source={{
-          uri: AS,
+          uri: EU,
         }}
         resizeMode={'contain'}
         navigator={navigation}
@@ -428,12 +414,28 @@ const StreamScreen = ({navigation, route}) => {
         paused={isPaused}
         onProgress={async Status => {
           setStatus(Status);
-          setProgress(Status.currentTime / Status.seekableDuration);
+          // setProgress(Status.currentTime / Status.seekableDuration);
         }}
-        subtitle={subtitles}
-        subtitleContainerStyle={styles.subtitlesContainerStyle}
-        subtitleStyle={styles.subtitlesTextStyle}
+        // subtitle={subtitles}
+        // subtitleContainerStyle={styles.subtitlesContainerStyle}
+        // subtitleStyle={styles.subtitlesTextStyle}
+        onError={err => {
+          console.error(err);
+        }}
+        onSeek={() => {
+          hasSeeked === 0 ? setHasSeeked(1) : setHasSeeked(0);
+        }}
       />
+      <View style={styles.subtitlesContainerStyle}>
+        {subtitlesVisible && video !== null && (
+          <Subtitles // here lies the subtitles file please look here while searching for the subtitle file
+            currentTime={status.currentTime}
+            hasSeeked={hasSeeked}
+            textStyle={styles.subtitlesTextStyle}
+            subtitlesArray={subtitles}
+          />
+        )}
+      </View>
       <Modal // main menu used to access other submenus. also changes subtitles' position to enable better visibility
         animationType="slide"
         transparent={true}
@@ -860,3 +862,21 @@ export default StreamScreen;
           </Text>
         </View>
       </View> */
+
+/* const convertMsToTime = milliseconds => {
+    //converts millieseconds to hh:mm:ss,SSS
+    const padTo2Digits = num => {
+      return num.toString().padStart(2, '0');
+    };
+    let seconds = Math.floor(milliseconds / 1000);
+    let minutes = Math.floor(seconds / 60);
+    let hours = Math.floor(minutes / 60);
+
+    milliseconds = milliseconds % 1000;
+    seconds = seconds % 60;
+    minutes = minutes % 60;
+
+    return `${padTo2Digits(hours)}:${padTo2Digits(minutes)}:${padTo2Digits(
+      seconds,
+    )},${padTo2Digits(milliseconds)}`;
+  }; */

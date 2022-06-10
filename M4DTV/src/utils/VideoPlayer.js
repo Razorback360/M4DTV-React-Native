@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, {Component} from 'react';
 import Video from 'react-native-video';
 import {
   TouchableWithoutFeedback,
@@ -6,13 +6,11 @@ import {
   ImageBackground,
   PanResponder,
   StyleSheet,
-  Touchable,
   Animated,
-  Platform,
   Easing,
   Image,
   View,
-  Text
+  Text,
 } from 'react-native';
 import _ from 'lodash';
 
@@ -52,7 +50,7 @@ export default class VideoPlayer extends Component {
 
       //Subtitle
       subtitleIndex: 0,
-      currentTimeInDeciSeconds: 0
+      currentTimeInDeciSeconds: 0,
     };
 
     /**
@@ -62,7 +60,7 @@ export default class VideoPlayer extends Component {
       playWhenInactive: this.props.playWhenInactive || false,
       playInBackground: this.props.playInBackground || false,
       repeat: this.props.repeat || false,
-      title: this.props.title || ''
+      title: this.props.title || '',
     };
 
     /**
@@ -74,7 +72,7 @@ export default class VideoPlayer extends Component {
       onScreenTouch: this._onScreenTouch.bind(this),
       onLoadStart: this._onLoadStart.bind(this),
       onProgress: this._onProgress.bind(this),
-      onLoad: this._onLoad.bind(this)
+      onLoad: this._onLoad.bind(this),
     };
 
     /**
@@ -85,7 +83,7 @@ export default class VideoPlayer extends Component {
       toggleFullscreen: this._toggleFullscreen.bind(this),
       togglePlayPause: this._togglePlayPause.bind(this),
       toggleControls: this._toggleControls.bind(this),
-      toggleTimer: this._toggleTimer.bind(this)
+      toggleTimer: this._toggleTimer.bind(this),
     };
 
     /**
@@ -99,7 +97,7 @@ export default class VideoPlayer extends Component {
       volumeWidth: 150,
       iconOffset: 7,
       seekWidth: 0,
-      ref: Video
+      ref: Video,
     };
 
     /**
@@ -108,19 +106,19 @@ export default class VideoPlayer extends Component {
     this.animations = {
       bottomControl: {
         marginBottom: new Animated.Value(0),
-        opacity: new Animated.Value(1)
+        opacity: new Animated.Value(1),
       },
       topControl: {
         marginTop: new Animated.Value(0),
-        opacity: new Animated.Value(1)
+        opacity: new Animated.Value(1),
       },
       video: {
-        opacity: new Animated.Value(1)
+        opacity: new Animated.Value(1),
       },
       loader: {
         rotate: new Animated.Value(0),
-        MAX_VALUE: 360
-      }
+        MAX_VALUE: 360,
+      },
     };
 
     /**
@@ -218,9 +216,9 @@ export default class VideoPlayer extends Component {
    * Set the error state to true which then
    * changes our renderError function
    *
-   * @param {object} err  Err obj returned from <Video> component
+   * @param {object} _err  Err obj returned from <Video> component
    */
-  _onError(err) {
+  _onError(_err) {
     let state = this.state;
     state.error = true;
     state.loading = false;
@@ -293,14 +291,27 @@ export default class VideoPlayer extends Component {
    * screen so they're not interactable
    */
   hideControlAnimation() {
-    Animated.parallel([
-      Animated.timing(this.animations.topControl.opacity, { toValue: 0, useNativeDriver: false}),
-      Animated.timing(this.animations.topControl.marginTop, { toValue: -100, useNativeDriver: false }),
-      Animated.timing(this.animations.bottomControl.opacity, { toValue: 0, useNativeDriver: false }),
-      Animated.timing(this.animations.bottomControl.marginBottom, {
-        toValue: -100, useNativeDriver: false
-      })
-    ],{useNativeDriver: false}).start();
+    Animated.parallel(
+      [
+        Animated.timing(this.animations.topControl.opacity, {
+          toValue: 0,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this.animations.topControl.marginTop, {
+          toValue: -100,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this.animations.bottomControl.opacity, {
+          toValue: 0,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this.animations.bottomControl.marginBottom, {
+          toValue: -100,
+          useNativeDriver: false,
+        }),
+      ],
+      {useNativeDriver: false},
+    ).start();
   }
 
   /**
@@ -309,14 +320,27 @@ export default class VideoPlayer extends Component {
    * fade in.
    */
   showControlAnimation() {
-    Animated.parallel([
-      Animated.timing(this.animations.topControl.opacity, { toValue: 1, useNativeDriver: false }),
-      Animated.timing(this.animations.topControl.marginTop, { toValue: 0, useNativeDriver: false }),
-      Animated.timing(this.animations.bottomControl.opacity, { toValue: 1, useNativeDriver: false }),
-      Animated.timing(this.animations.bottomControl.marginBottom, {
-        toValue: 0, useNativeDriver: false
-      })
-    ],{useNativeDriver: false}).start();
+    Animated.parallel(
+      [
+        Animated.timing(this.animations.topControl.opacity, {
+          toValue: 1,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this.animations.topControl.marginTop, {
+          toValue: 0,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this.animations.bottomControl.opacity, {
+          toValue: 1,
+          useNativeDriver: false,
+        }),
+        Animated.timing(this.animations.bottomControl.marginBottom, {
+          toValue: 0,
+          useNativeDriver: false,
+        }),
+      ],
+      {useNativeDriver: false},
+    ).start();
   }
 
   /**
@@ -324,20 +348,27 @@ export default class VideoPlayer extends Component {
    */
   loadAnimation() {
     if (this.state.loading) {
-      Animated.sequence([
-        Animated.timing(this.animations.loader.rotate, {
-          toValue: this.animations.loader.MAX_VALUE,
-          duration: 1500,
-          useNativeDriver: true,
-          easing: Easing.linear
-        },{useNativeDriver: false}),
-        Animated.timing(this.animations.loader.rotate, {
-          toValue: 0,
-          duration: 0,
-          useNativeDriver: true,
-          easing: Easing.linear
-        })
-      ], {useNativeDriver: true}).start(this.loadAnimation.bind(this));
+      Animated.sequence(
+        [
+          Animated.timing(
+            this.animations.loader.rotate,
+            {
+              toValue: this.animations.loader.MAX_VALUE,
+              duration: 1500,
+              useNativeDriver: true,
+              easing: Easing.linear,
+            },
+            {useNativeDriver: false},
+          ),
+          Animated.timing(this.animations.loader.rotate, {
+            toValue: 0,
+            duration: 0,
+            useNativeDriver: true,
+            easing: Easing.linear,
+          }),
+        ],
+        {useNativeDriver: true},
+      ).start(this.loadAnimation.bind(this));
     }
   }
 
@@ -418,7 +449,7 @@ export default class VideoPlayer extends Component {
       this.props.navigator.pop();
     } else {
       console.warn(
-        'Warning: _onBack requires navigator property to function. Either modify the onBack prop or pass a navigator prop'
+        'Warning: _onBack requires navigator property to function. Either modify the onBack prop or pass a navigator prop',
       );
     }
   }
@@ -612,7 +643,7 @@ export default class VideoPlayer extends Component {
   componentWillReceiveProps(nextProps) {
     if (this.state.paused !== nextProps.paused) {
       this.setState({
-        paused: nextProps.paused
+        paused: nextProps.paused,
       });
     }
   }
@@ -684,7 +715,7 @@ export default class VideoPlayer extends Component {
           state.seeking = false;
         }
         this.setState(state);
-      }
+      },
     });
   }
 
@@ -728,7 +759,7 @@ export default class VideoPlayer extends Component {
         state.volumeOffset = state.volumePosition;
         this.setControlTimeout();
         this.setState(state);
-      }
+      },
     });
   }
 
@@ -738,22 +769,29 @@ export default class VideoPlayer extends Component {
    *
    */
   binarySearch = (subtitles, first, last, value) => {
-    if (first > last) return -1;
+    if (first > last) {
+      return -1;
+    }
     let mid = Math.floor((first + last) / 2);
     if (
       value > this.parseTimeStringToDeciSecond(subtitles[mid].startTime) &&
       value < this.parseTimeStringToDeciSecond(subtitles[mid].endTime)
-    )
+    ) {
       return mid;
-    else if (value < this.parseTimeStringToDeciSecond(subtitles[mid].startTime))
+    } else if (
+      value < this.parseTimeStringToDeciSecond(subtitles[mid].startTime)
+    ) {
       return this.binarySearch(subtitles, first, mid - 1, value);
-    else if (value > this.parseTimeStringToDeciSecond(subtitles[mid].endTime))
+    } else if (
+      value > this.parseTimeStringToDeciSecond(subtitles[mid].endTime)
+    ) {
       return this.binarySearch(subtitles, mid + 1, last, value);
+    }
   };
   parseTimeStringToDeciSecond = str => {
     let splitByComma = str.split(',');
     let result = 0.0;
-    result = Math.round(parseInt(splitByComma[1]) / 100.0) / 10.0;
+    result = Math.round(parseInt(splitByComma[1], 10) / 100.0) / 10.0;
     let splitByColon = splitByComma[0].split(':');
     for (let i = 0; i < 3; i++) {
       result += splitByColon[i] * Math.pow(60, 2 - i);
@@ -761,23 +799,26 @@ export default class VideoPlayer extends Component {
     return (Math.floor(result * 10) / 10.0).toFixed(1);
   };
   showSubtitle() {
-    if (!this.props.subtitle) return null;
+    if (!this.props.subtitle) {
+      return null;
+    }
     let currentTime = this.state.currentTimeInDeciSeconds;
     let subtitleIndex = this.state.subtitleIndex;
     let subtitles = this.props.subtitle;
-    if (!subtitles[subtitleIndex])
+    if (!subtitles[subtitleIndex]) {
       return null;
+    }
     let startTime = this.parseTimeStringToDeciSecond(
-      subtitles[subtitleIndex].startTime
+      subtitles[subtitleIndex].startTime,
     );
     let endTime = this.parseTimeStringToDeciSecond(
-      subtitles[subtitleIndex].endTime
+      subtitles[subtitleIndex].endTime,
     );
-    let nextEndTime = this.parseTimeStringToDeciSecond(
-      subtitles[subtitleIndex + 1].endTime
-    );
-    if (currentTime > endTime){
-      this.setState({ subtitleIndex: subtitleIndex + 1 });
+    /* let nextEndTime = this.parseTimeStringToDeciSecond(
+      subtitles[subtitleIndex + 1].endTime,
+    ); */
+    if (currentTime > endTime) {
+      this.setState({subtitleIndex: subtitleIndex + 1});
       /* if (currentTime > nextEndTime){
         this.setState({ subtitleIndex: this.findSubtitleIndex() })
       } else
@@ -785,7 +826,9 @@ export default class VideoPlayer extends Component {
     }
     if (currentTime < endTime && currentTime > startTime) {
       return subtitles[subtitleIndex].text;
-    } else return null;
+    } else {
+      return null;
+    }
   }
   /*  findSubtitleIndex() {
     let currentTime = this.state.currentTimeInDeciSeconds;
@@ -796,17 +839,17 @@ export default class VideoPlayer extends Component {
     // since subtitle files average 1500 line(i think), using array.filter would take forever.
     // so we run this loop to decrease the length of the array to less than 5 objects, making the filter method much faster
     // we use exponential decay to achieve that result, using the formula { x * (1/2)^10 }. x being the length of the original subtitles array
-    for (let i = 0; i < 10; i++) { 
+    for (let i = 0; i < 10; i++) {
       if (subtitlesCopy.length > 5) {
         let middleOfSubtiltesArray = Math.floor( subtitlesCopy.length / 2 );
-        
+
         if (currentTime <= subtitles[middleOfSubtiltesArray].end) {
           subtitlesCopy = subtitlesCopy.slice( 0, middleOfSubtiltesArray + 1 );
-          
+
         } else if (currentTime > subtitles[middleOfSubtiltesArray].end) {
           subtitlesCopy = subtitlesCopy.slice(middleOfSubtiltesArray);
-          
-        } 
+
+        }
       } else break
     }
 
@@ -826,7 +869,7 @@ export default class VideoPlayer extends Component {
     }
 
 
-    
+
 
   } */
   /**End of Subtitle Part */
@@ -884,11 +927,11 @@ export default class VideoPlayer extends Component {
           styles.controls.top,
           {
             opacity: this.animations.topControl.opacity,
-            marginTop: this.animations.topControl.marginTop
-          }
+            marginTop: this.animations.topControl.marginTop,
+          },
         ]}>
         <ImageBackground
-          source={require('./assets/img/top-vignette.png')}
+          source={require('../assets/img/top-vignette.png')}
           style={[styles.controls.column]}
           imageStyle={[styles.controls.vignette]}>
           <View style={styles.controls.topControlGroup}>
@@ -909,11 +952,11 @@ export default class VideoPlayer extends Component {
   renderBack() {
     return this.renderControl(
       <Image
-        source={require('./assets/img/back.png')}
+        source={require('../assets/img/back.png')}
         style={styles.controls.back}
       />,
       this.methods.onBack,
-      styles.controls.back
+      styles.controls.back,
     );
   }
 
@@ -924,17 +967,17 @@ export default class VideoPlayer extends Component {
     return (
       <View style={styles.volume.container}>
         <View
-          style={[styles.volume.fill, { width: this.state.volumeFillWidth }]}
+          style={[styles.volume.fill, {width: this.state.volumeFillWidth}]}
         />
         <View
-          style={[styles.volume.track, { width: this.state.volumeTrackWidth }]}
+          style={[styles.volume.track, {width: this.state.volumeTrackWidth}]}
         />
         <View
-          style={[styles.volume.handle, { left: this.state.volumePosition }]}
+          style={[styles.volume.handle, {left: this.state.volumePosition}]}
           {...this.player.volumePanResponder.panHandlers}>
           <Image
             style={styles.volume.icon}
-            source={require('./assets/img/volume.png')}
+            source={require('../assets/img/volume.png')}
           />
         </View>
       </View>
@@ -947,12 +990,12 @@ export default class VideoPlayer extends Component {
   renderFullscreen() {
     let source =
       this.props.isFullscreen === true
-        ? require('./assets/img/my_shrink.png')
-        : require('./assets/img/my_expand.png');
+        ? require('../assets/img/my_shrink.png')
+        : require('../assets/img/my_expand.png');
     return this.renderControl(
       <Image source={source} />,
       this.methods.toggleFullscreen,
-      styles.controls.fullscreen
+      styles.controls.fullscreen,
     );
   }
 
@@ -976,11 +1019,11 @@ export default class VideoPlayer extends Component {
           styles.controls.bottom,
           {
             opacity: this.animations.bottomControl.opacity,
-            marginBottom: this.animations.bottomControl.marginBottom
-          }
+            marginBottom: this.animations.bottomControl.marginBottom,
+          },
         ]}>
         <ImageBackground
-          source={require('./assets/img/bottom-vignette.png')}
+          source={require('../assets/img/bottom-vignette.png')}
           style={[styles.controls.column]}
           imageStyle={[styles.controls.vignette]}>
           {seekbarControl}
@@ -1011,18 +1054,18 @@ export default class VideoPlayer extends Component {
               styles.seekbar.fill,
               {
                 width: this.state.seekerFillWidth,
-                backgroundColor: this.props.seekColor || '#FFF'
-              }
+                backgroundColor: this.props.seekColor || '#FFF',
+              },
             ]}
           />
         </View>
         <View
-          style={[styles.seekbar.handle, { left: this.state.seekerPosition }]}
+          style={[styles.seekbar.handle, {left: this.state.seekerPosition}]}
           {...this.player.seekPanResponder.panHandlers}>
           <View
             style={[
               styles.seekbar.circle,
-              { backgroundColor: this.props.seekColor || '#FFF' }
+              {backgroundColor: this.props.seekColor || '#FFF'},
             ]}
           />
         </View>
@@ -1036,12 +1079,12 @@ export default class VideoPlayer extends Component {
   renderPlayPause() {
     let source =
       this.state.paused === true
-        ? require('./assets/img/play.png')
-        : require('./assets/img/pause.png');
+        ? require('../assets/img/play.png')
+        : require('../assets/img/pause.png');
     return this.renderControl(
       <Image source={source} />,
       this.methods.togglePlayPause,
-      styles.controls.playPause
+      styles.controls.playPause,
     );
   }
 
@@ -1071,7 +1114,7 @@ export default class VideoPlayer extends Component {
     return this.renderControl(
       <Text style={styles.controls.timerText}>{this.calculateTime()}</Text>,
       this.methods.toggleTimer,
-      styles.controls.timer
+      styles.controls.timer,
     );
   }
 
@@ -1090,7 +1133,7 @@ export default class VideoPlayer extends Component {
       return (
         <View style={styles.loader.container}>
           <Animated.Image
-            source={require('./assets/img/loader-icon.png')}
+            source={require('../assets/img/loader-icon.png')}
             style={[
               styles.loader.icon,
               {
@@ -1098,11 +1141,11 @@ export default class VideoPlayer extends Component {
                   {
                     rotate: this.animations.loader.rotate.interpolate({
                       inputRange: [0, 360],
-                      outputRange: ['0deg', '360deg']
-                    })
-                  }
-                ]
-              }
+                      outputRange: ['0deg', '360deg'],
+                    }),
+                  },
+                ],
+              },
             ]}
           />
         </View>
@@ -1116,7 +1159,7 @@ export default class VideoPlayer extends Component {
       return (
         <View style={styles.error.container}>
           <Image
-            source={require('./assets/img/error-icon.png')}
+            source={require('../assets/img/error-icon.png')}
             style={styles.error.icon}
           />
           <Text style={styles.error.text}>Video unavailable</Text>
@@ -1165,11 +1208,19 @@ export default class VideoPlayer extends Component {
             source={this.props.source}
           />
 
-          { this.props.subtitle ? this.renderSubtitle() : null}
-          { !this.props.disableError ? this.renderError() : null }
-          { !this.props.disableBack || !this.props.disableVolume || !this.props.disableFullscreen ? this.renderTopControls() : null }
-          { !this.props.disableLoader ? this.renderLoader() : null }
-          { !this.props.disablePlayPause || !this.props.disableTimer || !this.props.disableSeekbar ? this.renderBottomControls() : null }
+          {this.props.subtitle ? this.renderSubtitle() : null}
+          {!this.props.disableError ? this.renderError() : null}
+          {!this.props.disableBack ||
+          !this.props.disableVolume ||
+          !this.props.disableFullscreen
+            ? this.renderTopControls()
+            : null}
+          {!this.props.disableLoader ? this.renderLoader() : null}
+          {!this.props.disablePlayPause ||
+          !this.props.disableTimer ||
+          !this.props.disableSeekbar
+            ? this.renderBottomControls()
+            : null}
         </View>
       </TouchableWithoutFeedback>
     );
@@ -1187,26 +1238,26 @@ const styles = {
       backgroundColor: '#000',
       flex: 1,
       alignSelf: 'stretch',
-      justifyContent: 'space-between'
+      justifyContent: 'space-between',
     },
     subtitle: {
       color: 'white',
       textAlign: 'center',
       textShadowColor: 'black',
-      textShadowOffset: { width: 1, height: 1 },
+      textShadowOffset: {width: 1, height: 1},
       paddingRight: 10,
-      paddingLeft: 10
+      paddingLeft: 10,
     },
     subtitleContainerPortrait: {
       position: 'absolute',
       top: 200,
       left: 100,
-      alignItems: 'center'
+      alignItems: 'center',
     },
     subtitleContainerLandscape: {
       position: 'absolute',
       bottom: 50,
-      left: 250
+      left: 250,
     },
     video: {
       overflow: 'hidden',
@@ -1214,8 +1265,8 @@ const styles = {
       top: 0,
       right: 0,
       bottom: 0,
-      left: 0
-    }
+      left: 0,
+    },
   }),
   error: StyleSheet.create({
     container: {
@@ -1226,15 +1277,15 @@ const styles = {
       bottom: 0,
       left: 0,
       justifyContent: 'center',
-      alignItems: 'center'
+      alignItems: 'center',
     },
     icon: {
-      marginBottom: 16
+      marginBottom: 16,
     },
     text: {
       backgroundColor: 'transparent',
-      color: '#f27474'
-    }
+      color: '#f27474',
+    },
   }),
   loader: StyleSheet.create({
     container: {
@@ -1244,8 +1295,8 @@ const styles = {
       bottom: 0,
       left: 0,
       alignItems: 'center',
-      justifyContent: 'center'
-    }
+      justifyContent: 'center',
+    },
   }),
   controls: StyleSheet.create({
     row: {
@@ -1253,41 +1304,41 @@ const styles = {
       alignItems: 'center',
       justifyContent: 'space-between',
       height: null,
-      width: null
+      width: null,
     },
     column: {
       flexDirection: 'column',
       alignItems: 'center',
       justifyContent: 'space-between',
       height: null,
-      width: null
+      width: null,
     },
     vignette: {
-      resizeMode: 'stretch'
+      resizeMode: 'stretch',
     },
     control: {
-      padding: 16
+      padding: 16,
     },
     text: {
       backgroundColor: 'transparent',
       color: '#FFF',
       fontSize: 14,
-      textAlign: 'center'
+      textAlign: 'center',
     },
     pullRight: {
       flexDirection: 'row',
       alignItems: 'center',
-      justifyContent: 'center'
+      justifyContent: 'center',
     },
     top: {
       flex: 1,
       alignItems: 'stretch',
-      justifyContent: 'flex-start'
+      justifyContent: 'flex-start',
     },
     bottom: {
       alignItems: 'stretch',
       flex: 2,
-      justifyContent: 'flex-end'
+      justifyContent: 'flex-end',
     },
     topControlGroup: {
       alignSelf: 'stretch',
@@ -1296,7 +1347,7 @@ const styles = {
       flexDirection: 'row',
       width: null,
       margin: 12,
-      marginBottom: 18
+      marginBottom: 18,
     },
     bottomControlGroup: {
       alignSelf: 'stretch',
@@ -1304,37 +1355,37 @@ const styles = {
       justifyContent: 'space-between',
       marginLeft: 12,
       marginRight: 12,
-      marginBottom: 0
+      marginBottom: 0,
     },
     volume: {
-      flexDirection: 'row'
+      flexDirection: 'row',
     },
     fullscreen: {
-      flexDirection: 'row'
+      flexDirection: 'row',
     },
     playPause: {
       position: 'relative',
       width: 80,
-      zIndex: 0
+      zIndex: 0,
     },
     title: {
       alignItems: 'center',
       flex: 0.6,
       flexDirection: 'column',
-      padding: 0
+      padding: 0,
     },
     titleText: {
-      textAlign: 'center'
+      textAlign: 'center',
     },
     timer: {
-      width: 80
+      width: 80,
     },
     timerText: {
       backgroundColor: 'transparent',
       color: '#FFF',
       fontSize: 11,
-      textAlign: 'right'
-    }
+      textAlign: 'right',
+    },
   }),
   volume: StyleSheet.create({
     container: {
@@ -1344,48 +1395,48 @@ const styles = {
       height: 1,
       marginLeft: 20,
       marginRight: 20,
-      width: 150
+      width: 150,
     },
     track: {
       backgroundColor: '#333',
       height: 1,
-      marginLeft: 7
+      marginLeft: 7,
     },
     fill: {
       backgroundColor: '#FFF',
-      height: 1
+      height: 1,
     },
     handle: {
       position: 'absolute',
       marginTop: -24,
       marginLeft: -24,
-      padding: 16
-    }
+      padding: 16,
+    },
   }),
   seekbar: StyleSheet.create({
     container: {
       alignSelf: 'stretch',
       height: 28,
       marginLeft: 20,
-      marginRight: 20
+      marginRight: 20,
     },
     track: {
       backgroundColor: '#333',
       height: 1,
       position: 'relative',
       top: 14,
-      width: '100%'
+      width: '100%',
     },
     fill: {
       backgroundColor: '#FFF',
       height: 1,
-      width: '100%'
+      width: '100%',
     },
     handle: {
       position: 'absolute',
       marginLeft: -7,
       height: 28,
-      width: 28
+      width: 28,
     },
     circle: {
       borderRadius: 12,
@@ -1393,7 +1444,7 @@ const styles = {
       top: 8,
       left: 8,
       height: 12,
-      width: 12
-    }
-  })
+      width: 12,
+    },
+  }),
 };
