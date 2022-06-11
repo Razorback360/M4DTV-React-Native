@@ -2,16 +2,16 @@
 import React, {useState, useRef} from 'react';
 import {
   useWindowDimensions,
-  Text,
+  // Text,
   View,
   StyleSheet,
   ActivityIndicator,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
+  // TextInput,
+  // TouchableOpacity,
+  // ScrollView,
 } from 'react-native';
 import {getTrending, getGenreShows, getGenresShows} from '../utils/Requests';
-import {storeUser, retrieveUser} from '../utils/Storage';
+// import {storeUser, retrieveUser} from '../utils/Storage';
 import LinearGradient from 'react-native-linear-gradient';
 import GenreView from '../components/GenreView';
 import GenreResults from '../components/GenreResults';
@@ -40,6 +40,11 @@ const ShowsScreen = ({navigation}) => {
       borderBottomWidth: 1,
       borderBottomColor: '#FFFFFF',
     },
+    activityIndicatorStyle: {
+      position: 'absolute',
+      top: '48%',
+      left: '48%',
+    },
   });
 
   if (!genres) {
@@ -48,8 +53,17 @@ const ShowsScreen = ({navigation}) => {
     });
 
     return (
-      <View>
-        <ActivityIndicator />
+      <View
+        style={{
+          backgroundColor: '#222222',
+          opacity: 0.5,
+          width: '100%',
+          height: '100%',
+        }}>
+        <ActivityIndicator
+          style={styles.activityIndicatorStyle}
+          size={'large'}
+        />
       </View>
     );
   }
@@ -67,7 +81,10 @@ const ShowsScreen = ({navigation}) => {
           <View style={styles.list}>
             <GenreView data={genres} />
           </View>
-          <ActivityIndicator />
+          <ActivityIndicator
+            style={styles.activityIndicatorStyle}
+            size={'large'}
+          />
         </View>
       );
     }
@@ -88,7 +105,12 @@ const ShowsScreen = ({navigation}) => {
             setShows(null);
           }}
         />
-        {!shows && <ActivityIndicator />}
+        {!shows && (
+          <ActivityIndicator
+            style={styles.activityIndicatorStyle}
+            size={'large'}
+          />
+        )}
       </View>
 
       <GenreResults
@@ -100,7 +122,12 @@ const ShowsScreen = ({navigation}) => {
           setLoadingData(true);
         }}
       />
-      {loadingData && <ActivityIndicator />}
+      {loadingData && (
+        <ActivityIndicator
+          style={styles.activityIndicatorStyle}
+          size={'large'}
+        />
+      )}
     </LinearGradient>
   );
 };

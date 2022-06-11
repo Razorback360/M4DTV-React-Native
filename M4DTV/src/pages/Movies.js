@@ -1,20 +1,20 @@
 /* eslint-disable react-native/no-inline-styles */
-import React, {useState, useRef} from 'react';
+import React, {useState} from 'react';
 import {
   useWindowDimensions,
-  Text,
+  // Text,
   View,
   StyleSheet,
   ActivityIndicator,
-  TextInput,
-  TouchableOpacity,
-  ScrollView,
+  // TextInput,
+  // TouchableOpacity,
+  // ScrollView,
 } from 'react-native';
-import {getTrending, getGenreMovies, getGenresMovies} from '../utils/Requests';
-import {storeUser, retrieveUser} from '../utils/Storage';
-import MediaSlider from '../components/MediaSlider';
+import {getGenreMovies, getGenresMovies} from '../utils/Requests';
+// import {storeUser, retrieveUser} from '../utils/Storage';
+// import MediaSlider from '../components/MediaSlider';
 import LinearGradient from 'react-native-linear-gradient';
-import Icon from 'react-native-vector-icons/MaterialIcons';
+// import Icon from 'react-native-vector-icons/MaterialIcons';
 import GenreView from '../components/GenreView';
 import GenreResults from '../components/GenreResults';
 
@@ -30,14 +30,42 @@ const MoviesScreen = ({navigation}) => {
   const width = size.width;
   const height = size.height;
 
+  const styles = StyleSheet.create({
+    tinyLogo: {
+      width: width * 0.3,
+      height: height * 0.3,
+      borderRadius: 10,
+      margin: 10,
+    },
+    list: {
+      marginBottom: 15,
+      borderBottomWidth: 1,
+      borderBottomColor: '#FFFFFF',
+    },
+    activityIndicatorStyle: {
+      position: 'absolute',
+      top: '48%',
+      left: '48%',
+    },
+  });
+
   if (!genres) {
     getGenresMovies().then(data => {
       setGenres(data.genres);
     });
 
     return (
-      <View>
-        <ActivityIndicator />
+      <View
+        style={{
+          backgroundColor: '#222222',
+          opacity: 0.5,
+          width: '100%',
+          height: '100%',
+        }}>
+        <ActivityIndicator
+          style={styles.activityIndicatorStyle}
+          size={'large'}
+        />
       </View>
     );
   }
@@ -52,26 +80,21 @@ const MoviesScreen = ({navigation}) => {
 
     if (!movies) {
       return (
-        <View>
-          <ActivityIndicator />
+        <View
+          style={{
+            backgroundColor: '#222222',
+            opacity: 0.5,
+            width: '100%',
+            height: '100%',
+          }}>
+          <ActivityIndicator
+            style={styles.activityIndicatorStyle}
+            size={'large'}
+          />
         </View>
       );
     }
   }
-
-  const styles = StyleSheet.create({
-    tinyLogo: {
-      width: width * 0.3,
-      height: height * 0.3,
-      borderRadius: 10,
-      margin: 10,
-    },
-    list: {
-      marginBottom: 15,
-      borderBottomWidth: 1,
-      borderBottomColor: '#FFFFFF',
-    },
-  });
 
   return (
     <LinearGradient
@@ -92,7 +115,12 @@ const MoviesScreen = ({navigation}) => {
           setLoadingData(true);
         }}
       />
-      {loadingData && <ActivityIndicator />}
+      {loadingData && (
+        <ActivityIndicator
+          style={styles.activityIndicatorStyle}
+          size={'large'}
+        />
+      )}
     </LinearGradient>
   );
 };

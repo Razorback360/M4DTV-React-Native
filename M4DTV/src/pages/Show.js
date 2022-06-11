@@ -169,12 +169,26 @@ const ShowScreen = ({navigation, route}) => {
       borderRadius: 5,
       paddingLeft: 5,
     },
+    activityIndicatorStyle: {
+      position: 'absolute',
+      top: '48%',
+      left: '48%',
+    },
   });
 
   if (isLoading) {
     return (
-      <View>
-        <ActivityIndicator />
+      <View
+        style={{
+          backgroundColor: '#222222',
+          opacity: 0.5,
+          width: '100%',
+          height: '100%',
+        }}>
+        <ActivityIndicator
+          style={styles.activityIndicatorStyle}
+          size={'large'}
+        />
       </View>
     );
   }

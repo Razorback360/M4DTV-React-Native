@@ -11,6 +11,7 @@ import {
   Modal,
   useTVEventHandler,
   ScrollView,
+  Button,
 } from 'react-native';
 import {
   getStreamMovie,
@@ -21,34 +22,44 @@ import {
 import Icon from 'react-native-vector-icons/MaterialIcons';
 //import {Video} from 'expo-av';
 import {useKeepAwake} from 'expo-keep-awake';
-// import * as Progress from 'react-native-progress';
+import * as Progress from 'react-native-progress';
 import Subtitles from '../utils/Subtitles';
-import VideoPlayer from '../utils/VideoPlayer';
-// import Video from 'react-native-video';
+// import VideoPlayer from '../utils/VideoPlayer';
+import Video from 'react-native-video';
 // import {WebView} from 'react-native-webview';
 // import axios from 'axios';
 import vttToJson from 'vtt-to-json';
 import {getSubtitles} from '../utils/Requests';
+// import LinearGradient from 'react-native-linear-gradient';
 
 const StreamScreen = ({navigation, route}) => {
-  const {tmdb_id, isShow, tvdb_id, season, episode, mediaTitle, mediaYear} =
-    route.params;
+  const {
+    tmdb_id,
+    isShow,
+    tvdb_id,
+    season,
+    episode,
+    mediaTitle,
+    mediaYear,
+    backdropImage,
+  } = route.params;
   const [isLoadingParams, setisLoadingParams] = useState(true); // Check to see if parameters for stream are loaded or not yet
   const [isLoadingStream, setIsLoadingStream] = useState(true); // Check to see if stream is loaded or not yet
-  const video = useRef(null); // Used to control Video player.
+  let controlVideo = useRef(null); // Used to control Video player.
   const [settingsVisible, setSettingVisible] = useState(false); // Determines if settings menu is visible or not
   const [serversVisible, setServersVisible] = useState(false); // Determines if servers submenu is visible or not
-  // const [isdisabledOpacity, setIsDisabledOpacity] = useState(false); // :shrug: Later use
+  const [isdisabledOpacity, setIsDisabledOpacity] = useState(false); // :shrug: Later use
   const [isPaused, setIsPaused] = useState(false); // Determines if video player is paused
+  const [isBuffering, setIsBuffering] = useState(false); // Determines if video player is Buffering
   const [key, setKey] = useState(null); // Sets streaming key to get the stream from the server
   const [tutorialVisible, setTutorialVisible] = useState(false);
   const [status, setStatus] = useState({}); // Gets video status for use with video overlay
-  // const [progress, setProgress] = useState(0); // Video progress
-  const [disableOverlayVisible, setDisableOverlayVisible] = useState(false); // Sets if progress overlay is visible or not
+  const [progress, setProgress] = useState(0); // Video progress
+  const [disableOverlayVisible, setDisableOverlayVisible] = useState(0); // Sets if progress overlay is visible or not
   // const [durationSet, setDurationSet] = useState(false);
   const [seekingMultiplier, setSeekingMultiplier] = useState(1);
-  const [isMenuVisible, setIsMenuVisible] = useState(false); // checks if any menu is visible. used to change subtitles position when a menu is visible (totaly useless)
   const [hasSeeked, setHasSeeked] = useState(0); // Checks if video is seeked; used to help sync subtitles
+  const [subtitlePosition, setSubtitlePosition] = useState('4%'); // checks and sets subtitles position
   const [subtitles, setSubtitles] = useState([]);
   const [subtitlesVisible, setSubtitlesVisible] = useState(true); // Checks and Determines subtitle visibility
   const [subtitlesColor, setSubtitlesColor] = useState('#FFFFFF'); // Checks and Determines subtitles' color
@@ -67,7 +78,6 @@ const StreamScreen = ({navigation, route}) => {
       // Show video player settings.
       if (evt.eventType === 'down' && !settingsVisible) {
         setSettingVisible(true);
-        setIsMenuVisible(true);
         if (!isPaused) {
           setIsPaused(true);
         }
@@ -75,37 +85,28 @@ const StreamScreen = ({navigation, route}) => {
 
       // Show/Hide video player progress.
       else if (evt.eventType === 'up' && !settingsVisible) {
-        !disableOverlayVisible
-          ? setDisableOverlayVisible(true)
-          : setDisableOverlayVisible(false);
+        disableOverlayVisible === 0 && !isPaused
+          ? setDisableOverlayVisible(1)
+          : setDisableOverlayVisible(0);
       }
 
       // Rewind 10 seconds from current position.
       else if (evt.eventType === 'left' && !settingsVisible) {
-        video.player.seek(status.currentTime + 10 * seekingMultiplier);
-        // video.player.seek(status.currentTime + 10 * seekingMultiplier);
-        // hasSeeked === 0 ? setHasSeeked(1) : setHasSeeked(0);
+        controlVideo.seek(status.currentTime - 10 * seekingMultiplier);
       }
 
       // Fast forward 10 seconds from current position.
       else if (evt.eventType === 'right' && !settingsVisible) {
-        video.player.seek(status.currentTime + 10 * seekingMultiplier);
-        // hasSeeked === 0 ? setHasSeeked(1) : setHasSeeked(0);
+        controlVideo.seek(status.currentTime + 10 * seekingMultiplier);
       }
 
       // Play/Pause video player (Select button).
       else if (evt.eventType === 'select' && !settingsVisible) {
-        isPaused
-          ? setDisableOverlayVisible(true)
-          : setDisableOverlayVisible(false);
         isPaused ? setIsPaused(false) : setIsPaused(true);
       }
 
       // Play/Pause video player (Play/Pause button).
       else if (evt.eventType === 'playPause' && !settingsVisible) {
-        isPaused
-          ? setDisableOverlayVisible(true)
-          : setDisableOverlayVisible(false);
         isPaused ? setIsPaused(false) : setIsPaused(true);
       }
     }
@@ -185,14 +186,14 @@ const StreamScreen = ({navigation, route}) => {
       marginRight: 11,
     },
     video: {
-      /* alignSelf: 'center',
+      alignSelf: 'center',
       width: '100%',
-      height: '100%', */
-      position: 'absolute',
+      height: '100%',
+      /*  position: 'absolute',
       top: 0,
       left: 0,
       bottom: 0,
-      right: 0,
+      right: 0, */
     },
     buttons: {
       flexDirection: 'row',
@@ -204,7 +205,7 @@ const StreamScreen = ({navigation, route}) => {
       flexShrink: 1,
       justifyContent: 'center',
       alignSelf: 'center',
-      backgroundColor: '#050227',
+      backgroundColor: '#050525',
       padding: 10,
       //marginTop: '36%',
       maxHeight: height * 0.45,
@@ -234,40 +235,47 @@ const StreamScreen = ({navigation, route}) => {
     settingSectionIcon: {
       alignContent: 'center',
       color: '#FFFFFF',
-      marginTop: 5,
+      marginTop: width * 0.005,
       fontSize: width * 0.02,
     },
-    /* overlay: {
+    overlay: {
       backgroundColor: 'rgba(0, 0, 0, 0)',
-      bottom: '15%',
-      opacity: disableOverlayVisible,
+      bottom: '1%',
+      opacity: isPaused ? 1 : disableOverlayVisible,
       position: 'absolute',
-      left: '1%',
-    }, */
+      alignSelf: 'center',
+      maxWidth: '99%',
+      marginBottom: width * 0.01,
+    },
     subtitlesContainerStyle: {
       // a view that is as wide as the screen and as tall as the text.
       // is located in the lower half of the screen
       // responsible mainly to hold the subtitles
       // some padding and other things half of them are probably useless
-      // dont ask it just works
+      // don't ask it just works
       flexDirection: 'row',
       flex: 1,
       justifyContent: 'center',
       width: '100%',
       alignContent: 'center',
-      bottom: isMenuVisible ? '45%' : '10%',
+      bottom: subtitlePosition,
       position: 'absolute',
       paddingHorizontal: '30%',
-      marginBottom: 10,
+      marginBottom: width * 0.01,
     },
     subtitlesTextStyle: {
       textAlign: 'center',
       color: subtitlesColor,
       fontSize: width * subtitlesSizeMultiplier,
-      padding: 5,
+      padding: width * 0.005,
       textShadowColor: '#000000',
       textShadowOffset: {width: 1, height: 1},
       textShadowRadius: 5,
+    },
+    activityIndicatorStyle: {
+      position: 'absolute',
+      top: '48%',
+      left: '48%',
     },
   });
 
@@ -345,7 +353,7 @@ const StreamScreen = ({navigation, route}) => {
   const AS = `https://as.movies4discord.xyz/?viewkey=${key}`;
   const US = `https://us.movies4discord.xyz/?viewkey=${key}`;
 
-  /*  const convertSecondsToTime = seconds => {
+  const convertSecondsToTime = seconds => {
     // converts seconds to hh:mm:ss
     const padTo2Digits = num => {
       return num.toString().padStart(2, '0');
@@ -361,7 +369,7 @@ const StreamScreen = ({navigation, route}) => {
       seconds,
     )}`;
   };
-  const modifyHistory = async () => {
+  /* const modifyHistory = async () => {
     if (isShow) {
       await addHistory(tvdb_id, tmdb_id, season, episode, progress * 100);
     } else {
@@ -391,43 +399,57 @@ const StreamScreen = ({navigation, route}) => {
     }
   } */
 
-  // https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4
+  // https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_30mb.mp4
   // https://rinzry2.rinzry2.workers.dev/0:/Movies/The%20Lost%20City%20(2022)/The%20Lost%20City%20(2022)%20WEBDL-1080p%208bit%20h264%20AAC%202.0%20-CMRG.mp4
-  // https://sample-videos.com/video123/mkv/720/big_buck_bunny_720p_2mb.mkv
+  // https://sample-videos.com/video123/mkv/720/big_buck_bunny_720p_30mb.mkv
+  // https://rinzry3.rinzry3.workers.dev/0:/Movies/6%20Underground%20(2019)/6%20Underground%20(2019)%20imdb-tt8106534%20WEBDL-2160p%20HDR%2010bit%20h265%20EAC3%20Atmos%205.1.mkv
 
   return (
     <View style={styles.container}>
-      <VideoPlayer
-        ref={video}
-        style={styles.video}
-        source={{
-          uri: EU,
-        }}
-        resizeMode={'contain'}
-        navigator={navigation}
-        disableFullscreen={true}
-        disableVolume={true}
-        disableBack={true}
-        disableSeekbar={disableOverlayVisible}
-        disableTimer={disableOverlayVisible}
-        disablePlayPause={disableOverlayVisible}
-        paused={isPaused}
-        onProgress={async Status => {
-          setStatus(Status);
-          // setProgress(Status.currentTime / Status.seekableDuration);
-        }}
-        // subtitle={subtitles}
-        // subtitleContainerStyle={styles.subtitlesContainerStyle}
-        // subtitleStyle={styles.subtitlesTextStyle}
-        onError={err => {
-          console.error(err);
-        }}
-        onSeek={() => {
-          hasSeeked === 0 ? setHasSeeked(1) : setHasSeeked(0);
-        }}
+      <TouchableOpacity
+        onPress={() => {}}
+        disabled={isdisabledOpacity}
+        activeOpacity={1}
+        hasTVPreferredFocus={true}
+        style={styles.video}>
+        <Video
+          ref={ref => {
+            controlVideo = ref;
+          }}
+          source={{
+            uri: AS,
+          }}
+          style={styles.video}
+          resizeMode={'contain'}
+          paused={isPaused}
+          poster={backdropImage}
+          posterResizeMode={'contain'}
+          onLoadStart={() => {
+            setIsBuffering(true);
+          }}
+          onReadyForDisplay={() => {
+            setIsBuffering(false);
+          }}
+          onProgress={async Status => {
+            setStatus(Status);
+            setProgress(Status.currentTime / Status.seekableDuration);
+          }}
+          onError={err => {
+            console.error(err);
+          }}
+          onSeek={() => {
+            hasSeeked === 0 ? setHasSeeked(1) : setHasSeeked(0);
+          }}
+        />
+      </TouchableOpacity>
+      <ActivityIndicator
+        animating={isBuffering}
+        size={'large'}
+        color={'#007AFF'}
+        style={styles.activityIndicatorStyle}
       />
       <View style={styles.subtitlesContainerStyle}>
-        {subtitlesVisible && video !== null && (
+        {subtitlesVisible && (
           <Subtitles // here lies the subtitles file please look here while searching for the subtitle file
             currentTime={status.currentTime}
             hasSeeked={hasSeeked}
@@ -436,6 +458,50 @@ const StreamScreen = ({navigation, route}) => {
           />
         )}
       </View>
+      <View style={styles.overlay}>
+        <View
+          style={{
+            flexDirection: 'row',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            backgroundColor: '#001018',
+            padding: width * 0.01,
+            borderRadius: 10,
+            borderColor: '#002C5A',
+            borderWidth: width * 0.0015,
+          }}>
+          <Text
+            style={{
+              color: '#FFFFFF',
+              padding: width * 0.01,
+              fontSize: width * 0.0125,
+            }}>
+            {isNaN(status.currentTime)
+              ? '00:00:00'
+              : convertSecondsToTime(status.currentTime)}
+          </Text>
+          {!isNaN(progress) && (
+            <Progress.Bar
+              // color="#000088"
+              width={width * 0.8}
+              borderWidth={1}
+              unfilledColor={'#343434'}
+              borderRadius={2}
+              progress={parseFloat(progress.toFixed(2))}
+            />
+          )}
+          <Text
+            style={{
+              color: '#FFFFFF',
+              padding: width * 0.01,
+              fontSize: width * 0.0125,
+            }}>
+            {isNaN(status.seekableDuration)
+              ? '00:00:00'
+              : convertSecondsToTime(status.seekableDuration)}
+          </Text>
+        </View>
+      </View>
       <Modal // main menu used to access other submenus. also changes subtitles' position to enable better visibility
         animationType="slide"
         transparent={true}
@@ -443,7 +509,6 @@ const StreamScreen = ({navigation, route}) => {
         onRequestClose={() => {
           setSettingVisible(false);
           setIsPaused(false);
-          setIsMenuVisible(false);
         }}>
         <View style={styles.settingsMain}>
           <ScrollView>
@@ -492,9 +557,9 @@ const StreamScreen = ({navigation, route}) => {
           <ScrollView>
             <TouchableOpacity
               onPress={() => {
-                video.current.getStatusAsync().then(data => {
-                  video.current.unloadAsync().then(() => {
-                    video.current.loadAsync(
+                controlVideo.current.getStatusAsync().then(data => {
+                  controlVideo.current.unloadAsync().then(() => {
+                    controlVideo.current.loadAsync(
                       {uri: AS},
                       {positionMillis: data.positionMillis, shouldPlay: true},
                     );
@@ -507,9 +572,9 @@ const StreamScreen = ({navigation, route}) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                video.current.getStatusAsync().then(data => {
-                  video.current.unloadAsync().then(() => {
-                    video.current.loadAsync(
+                controlVideo.current.getStatusAsync().then(data => {
+                  controlVideo.current.unloadAsync().then(() => {
+                    controlVideo.current.loadAsync(
                       {uri: EU},
                       {positionMillis: data.positionMillis, shouldPlay: true},
                     );
@@ -522,9 +587,9 @@ const StreamScreen = ({navigation, route}) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                video.current.getStatusAsync().then(data => {
-                  video.current.unloadAsync().then(() => {
-                    video.current.loadAsync(
+                controlVideo.current.getStatusAsync().then(data => {
+                  controlVideo.current.unloadAsync().then(() => {
+                    controlVideo.current.loadAsync(
                       {uri: US},
                       {positionMillis: data.positionMillis, shouldPlay: true},
                     );

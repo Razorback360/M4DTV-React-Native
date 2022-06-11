@@ -72,6 +72,11 @@ const SearchScreen = ({navigation, route}) => {
     icons: {
       bottom: '40%',
     },
+    activityIndicatorStyle: {
+      position: 'absolute',
+      top: '48%',
+      left: '48%',
+    },
   });
 
   if ((query && !alreadySearched) || endReached) {
@@ -117,8 +122,18 @@ const SearchScreen = ({navigation, route}) => {
           setEndReached(data);
         }}
       />
-      {(endReached && <ActivityIndicator />) ||
-        (!alreadySearched && <ActivityIndicator />)}
+      {(endReached && (
+        <ActivityIndicator
+          style={styles.activityIndicatorStyle}
+          size={'large'}
+        />
+      )) ||
+        (!alreadySearched && (
+          <ActivityIndicator
+            style={styles.activityIndicatorStyle}
+            size={'large'}
+          />
+        ))}
     </LinearGradient>
   );
 };

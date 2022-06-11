@@ -79,12 +79,26 @@ const WatchlistScreen = ({navigation}) => {
     icons: {
       bottom: '40%',
     },
+    activityIndicatorStyle: {
+      position: 'absolute',
+      top: '48%',
+      left: '48%',
+    },
   });
 
   if (isLoadingWatchlist) {
     return (
-      <View>
-        <ActivityIndicator />
+      <View
+        style={{
+          backgroundColor: '#222222',
+          opacity: 0.5,
+          width: '100%',
+          height: '100%',
+        }}>
+        <ActivityIndicator
+          style={styles.activityIndicatorStyle}
+          size={'large'}
+        />
       </View>
     );
   }

@@ -5,7 +5,7 @@ import {Text} from 'react-native';
 
 const Subtitles = ({currentTime, hasSeeked, textStyle, subtitlesArray}) => {
   const [subtitles, setSubtitles] = useState(null);
-  const [parsedSubtitles, setParsedSubtitles] = useState(null);
+  // const [parsedSubtitles, setParsedSubtitles] = useState(null);
   const [text, setText] = useState(null);
   const [isSubtitlesSynced, setIsSubtitlesSynced] = useState(true);
   // const [videoTime, setVideoTime] = useState(0);
@@ -13,9 +13,10 @@ const Subtitles = ({currentTime, hasSeeked, textStyle, subtitlesArray}) => {
   // console.log(subtitlesArray);
 
   useEffect(() => {
+    setText('');
     setSubtitles(subtitlesArray);
-    setParsedSubtitles(subtitlesArray);
-  }, [subtitlesArray]);
+    setIsSubtitlesSynced(false);
+  }, [subtitlesArray, hasSeeked]);
 
   /*   useEffect(() => {
     //we get the vtt file. then we convert and map the file to the array "result". then we setSubtitle to aforementioned "results"
