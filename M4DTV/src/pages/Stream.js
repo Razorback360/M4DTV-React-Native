@@ -16,8 +16,8 @@ import {
 import {
   getStreamMovie,
   getStreamTV,
-  // addHistory,
-  // getSingleHistory,
+  addHistory,
+  getSingleHistory,
 } from '../utils/Requests';
 import Icon from 'react-native-vector-icons/MaterialIcons';
 //import {Video} from 'expo-av';
@@ -30,6 +30,7 @@ import Video from 'react-native-video';
 // import axios from 'axios';
 import vttToJson from 'vtt-to-json';
 import {getSubtitles} from '../utils/Requests';
+import {VLCPlayer, VlCPlayerView} from 'react-native-vlc-media-player';
 // import LinearGradient from 'react-native-linear-gradient';
 
 const StreamScreen = ({navigation, route}) => {
@@ -56,13 +57,13 @@ const StreamScreen = ({navigation, route}) => {
   const [status, setStatus] = useState({}); // Gets video status for use with video overlay
   const [progress, setProgress] = useState(0); // Video progress
   const [disableOverlayVisible, setDisableOverlayVisible] = useState(0); // Sets if progress overlay is visible or not
-  const [overlayColors, setOverlayColors] = useState([])
-  // const [durationSet, setDurationSet] = useState(false);
+  const [overlayColors, setOverlayColors] = useState(['#001018', '#002C5A']);
+  const [durationSet, setDurationSet] = useState(false);
   const [seekingMultiplier, setSeekingMultiplier] = useState(1);
   const [hasSeeked, setHasSeeked] = useState(0); // Checks if video is seeked; used to help sync subtitles
   const [subtitlePosition, setSubtitlePosition] = useState('4%'); // checks and sets subtitles position
-  const [subtitles, setSubtitles] = useState(['#001018','#002C5A']);
-  const [subtitlesVisible, setSubtitlesVisible] = useState(false); // Checks and Determines subtitle visibility
+  const [subtitles, setSubtitles] = useState(null);
+  const [subtitlesVisible, setSubtitlesVisible] = useState(true); // Checks and Determines subtitle visibility
   const [subtitlesColor, setSubtitlesColor] = useState('#FFFFFF'); // Checks and Determines subtitles' color
   const [subtitlesMenuVisible, setSubtitlesMenuVisible] = useState(false); // Checks and Determines if Subtitles submenu is visible or not
   const [subtitlesSizeMultiplier, setSubtitlesSizeMultiplier] = useState(0.02); // just read the name lmao
@@ -81,6 +82,7 @@ const StreamScreen = ({navigation, route}) => {
       // Show video player settings.
       if (evt.eventType === 'down' && !settingsVisible) {
         setSettingVisible(true);
+        setSubtitlePosition('45%');
         if (!isPaused) {
           setIsPaused(true);
         }
@@ -88,6 +90,9 @@ const StreamScreen = ({navigation, route}) => {
 
       // Show/Hide video player progress.
       else if (evt.eventType === 'up' && !settingsVisible) {
+        disableOverlayVisible === 0 && !isPaused
+          ? setSubtitlePosition('10%')
+          : setSubtitlePosition('4%');
         disableOverlayVisible === 0 && !isPaused
           ? setDisableOverlayVisible(1)
           : setDisableOverlayVisible(0);
@@ -105,11 +110,13 @@ const StreamScreen = ({navigation, route}) => {
 
       // Play/Pause video player (Select button).
       else if (evt.eventType === 'select' && !settingsVisible) {
+        isPaused ? setSubtitlePosition('4%') : setSubtitlePosition('10%');
         isPaused ? setIsPaused(false) : setIsPaused(true);
       }
 
       // Play/Pause video player (Play/Pause button).
       else if (evt.eventType === 'playPause' && !settingsVisible) {
+        isPaused ? setSubtitlePosition('4%') : setSubtitlePosition('10%');
         isPaused ? setIsPaused(false) : setIsPaused(true);
       }
     }
@@ -280,6 +287,16 @@ const StreamScreen = ({navigation, route}) => {
       top: '48%',
       left: '48%',
     },
+    videoPlayerControlsStyle: {
+      flexDirection: 'row',
+      justifyContent: 'space-between',
+      alignItems: 'center',
+      backgroundColor: overlayColors[0],
+      padding: width * 0.01,
+      borderRadius: 10,
+      borderColor: overlayColors[1],
+      borderWidth: width * 0.0015,
+    },
   });
 
   if (tutorialVisible) {
@@ -343,14 +360,6 @@ const StreamScreen = ({navigation, route}) => {
     });
   }
 
-  if (isLoadingStream === true && !tutorialVisible) {
-    return (
-      <View>
-        <ActivityIndicator />
-      </View>
-    );
-  }
-
   // The 3 stream servers, EU is on by default, may use user configured default later on
   const EU = `https://eu.movies4discord.xyz/?viewkey=${key}`;
   const AS = `https://as.movies4discord.xyz/?viewkey=${key}`;
@@ -384,7 +393,8 @@ const StreamScreen = ({navigation, route}) => {
     if (isShow) {
       getSingleHistory(tvdb_id, tmdb_id, season, episode).then(data => {
         data.percentage !== null
-          ?controlVideo.seek(status.durationMillis * (data.percentage / 100))
+          ? controlVideo
+              .seek(status.durationMillis * (data.percentage / 100))
               .then(() => {})
           : null;
         setDurationSet(true);
@@ -392,7 +402,8 @@ const StreamScreen = ({navigation, route}) => {
     } else {
       getSingleHistory(0, tmdb_id, 0, 0).then(data => {
         data.percentage !== null
-          ? controlVideo.seek(status.durationMillis * (data.percentage / 100))
+          ? controlVideo
+              .seek(status.durationMillis * (data.percentage / 100))
               .then(() => {})
           : null;
         setDurationSet(true);
@@ -404,7 +415,12 @@ const StreamScreen = ({navigation, route}) => {
   // https://rinzry2.rinzry2.workers.dev/0:/Movies/The%20Lost%20City%20(2022)/The%20Lost%20City%20(2022)%20WEBDL-1080p%208bit%20h264%20AAC%202.0%20-CMRG.mp4
   // https://sample-videos.com/video123/mkv/720/big_buck_bunny_720p_30mb.mkv
   // https://rinzry3.rinzry3.workers.dev/0:/Movies/6%20Underground%20(2019)/6%20Underground%20(2019)%20imdb-tt8106534%20WEBDL-2160p%20HDR%2010bit%20h265%20EAC3%20Atmos%205.1.mkv
-
+  // https://rinzry3.rinzry3.workers.dev/0:/TV/more%20shows/tv.MightNeedRename/Stranger%20Things%20(2016)%20S01%202160p%204K%2010bit%20BluRay%20x265%20HEVC%20[Hindi%20DDP%205.1%20640Kbps%20+%20English%20AAC%205.1]%20ESub%20~%20FS90%20Joy%20[UTRCorp]/Stranger%20Things%20S01%20E01%202160p%2010bit%20BluRay%20x265%20HEVC%20[Hindi%20DDP%205.1%20640Kbps%20+%20English%20AAC%205.1]%20ESub.mkv
+  // https://rinzry3.rinzry3.workers.dev/0:/TV/Breaking%20Bad/Season%201/Breaking%20Bad%20-%20S01E01%20-%20Pilot%20HDTV-2160p.mkv
+  // https://rinzry3.rinzry3.workers.dev/0:/TV/Breaking%20Bad/Season%201/Breaking%20Bad%20-%20S01E07%20-%20A%20No-Rough-Stuff-Type%20Deal%20Bluray-1080p.mkv
+  // https://rinzry3.rinzry3.workers.dev/0:/TV/Breaking%20Bad/S01-S05%20x265%201080p/s01/Breaking_Bad_S01E07_x265_1080p_BluRay_30nama_30NAMA.mkv
+  // https://dl6.webmfiles.org/TearsOfSteel_720p_h265.mkv
+  // https://dl6.webmfiles.org/TearsOfSteel_720p_h265.mkv
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -442,7 +458,7 @@ const StreamScreen = ({navigation, route}) => {
             console.error(err);
           }}
           onSeek={() => {
-            setHasSeeked(hasSeeked++);
+            setHasSeeked(hasSeeked + 1);
           }}
         />
       </TouchableOpacity>
@@ -463,17 +479,7 @@ const StreamScreen = ({navigation, route}) => {
         )}
       </View>
       <View style={styles.overlay}>
-        <View
-          style={{
-            flexDirection: 'row',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            backgroundColor: overlayColors[0],
-            padding: width * 0.01,
-            borderRadius: 10,
-            borderColor: overlayColors[1],
-            borderWidth: width * 0.0015,
-          }}>
+        <View style={styles.videoPlayerControlsStyle}>
           <Text
             style={{
               color: '#FFFFFF',
@@ -513,6 +519,7 @@ const StreamScreen = ({navigation, route}) => {
         onRequestClose={() => {
           setSettingVisible(false);
           setIsPaused(false);
+          setSubtitlePosition('4%');
         }}>
         <View style={styles.settingsMain}>
           <ScrollView>
@@ -628,6 +635,17 @@ const StreamScreen = ({navigation, route}) => {
                   {subtitlesVisible //rename the button depending on subtitleVisible variable
                     ? 'turn subtitles off'
                     : 'turn subtitles on'}
+                </Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                //open subtitle size menu
+                setHasSeeked(hasSeeked + 1);
+              }}>
+              <View style={styles.settingSection}>
+                <Text style={styles.settingSectionText}>
+                  Sync Subtitles NOW!
                 </Text>
               </View>
             </TouchableOpacity>
@@ -879,7 +897,7 @@ const StreamScreen = ({navigation, route}) => {
           <ScrollView>
             <TouchableOpacity
               onPress={() => {
-                setOverlayColor(['#001018','#002C5A']);
+                setOverlayColors(['#001018', '#002C5A']);
               }}>
               <View style={styles.settingSection}>
                 <Text style={styles.settingSectionText}>blueish</Text>
@@ -887,15 +905,7 @@ const StreamScreen = ({navigation, route}) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                setOverlayColor(['#8aa29e','#fafafa']);
-              }}>
-              <View style={styles.settingSection}>
-                <Text style={styles.settingSectionText}>somethingish idk</Text>
-              </View>
-            </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => {
-                setOverlayColor(['#690C0C','#CE2424']);
+                setOverlayColors(['#180000', '#CE2424']);
               }}>
               <View style={styles.settingSection}>
                 <Text style={styles.settingSectionText}>reddish</Text>
@@ -903,27 +913,76 @@ const StreamScreen = ({navigation, route}) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                setOverlayColor(['#001515','#006666']);
+                setOverlayColors(['#001515', '#006666']);
               }}>
               <View style={styles.settingSection}>
                 <Text style={styles.settingSectionText}>greenish</Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setOverlayColors(['#2C1A07', '#CC7722']);
+              }}>
+              <View style={styles.settingSection}>
+                <Text style={styles.settingSectionText}>ochreish idk</Text>
+              </View>
+            </TouchableOpacity>
           </ScrollView>
         </View>
       </Modal>
-      
     </View>
   );
 };
 
 export default StreamScreen;
 
+/* <TouchableOpacity
+        onPress={() => {}}
+        disabled={isdisabledOpacity}
+        activeOpacity={1}
+        hasTVPreferredFocus={true}
+        style={styles.video}>
+        <Video
+          ref={ref => {
+            controlVideo = ref;
+          }}
+          source={{
+            uri: AS,
+          }}
+          style={styles.video}
+          resizeMode={'contain'}
+          paused={isPaused}
+          poster={backdropImage}
+          posterResizeMode={'contain'}
+          onLoadStart={() => {
+            setIsBuffering(true);
+          }}
+          onReadyForDisplay={() => {
+            setIsBuffering(false);
+          }}
+          onProgress={async Status => {
+            setStatus(Status);
+            setProgress(Status.currentTime / Status.seekableDuration);
+            if (durationSet && !tutorialVisible) {
+              await modifyHistory();
+            }
+          }}
+          onError={err => {
+            console.error(err);
+          }}
+          onSeek={() => {
+            setHasSeeked(hasSeeked + 1);
+          }}
+        />
+      </TouchableOpacity> */
 
-
-/*  */
-
-
+/*  if (isLoadingStream === true && !tutorialVisible) {
+    return (
+      <View>
+        <ActivityIndicator />
+      </View>
+    );
+  } */
 
 /*   */
 // <WebView source={{uri: EU}} style={styles.video} />
