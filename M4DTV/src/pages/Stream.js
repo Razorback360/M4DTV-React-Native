@@ -56,12 +56,13 @@ const StreamScreen = ({navigation, route}) => {
   const [status, setStatus] = useState({}); // Gets video status for use with video overlay
   const [progress, setProgress] = useState(0); // Video progress
   const [disableOverlayVisible, setDisableOverlayVisible] = useState(0); // Sets if progress overlay is visible or not
+  const [overlayColors, setOverlayColors] = useState([])
   // const [durationSet, setDurationSet] = useState(false);
   const [seekingMultiplier, setSeekingMultiplier] = useState(1);
   const [hasSeeked, setHasSeeked] = useState(0); // Checks if video is seeked; used to help sync subtitles
   const [subtitlePosition, setSubtitlePosition] = useState('4%'); // checks and sets subtitles position
-  const [subtitles, setSubtitles] = useState([]);
-  const [subtitlesVisible, setSubtitlesVisible] = useState(true); // Checks and Determines subtitle visibility
+  const [subtitles, setSubtitles] = useState(['#001018','#002C5A']);
+  const [subtitlesVisible, setSubtitlesVisible] = useState(false); // Checks and Determines subtitle visibility
   const [subtitlesColor, setSubtitlesColor] = useState('#FFFFFF'); // Checks and Determines subtitles' color
   const [subtitlesMenuVisible, setSubtitlesMenuVisible] = useState(false); // Checks and Determines if Subtitles submenu is visible or not
   const [subtitlesSizeMultiplier, setSubtitlesSizeMultiplier] = useState(0.02); // just read the name lmao
@@ -70,6 +71,8 @@ const StreamScreen = ({navigation, route}) => {
     useState(false); // Checks and Determines if Subtitles' colors' submenu is visible or not
   const [optionsMenuVisible, setOptionsMenuVisible] = useState(false); // Checks and Determines if options submenu is visible or not
   const [seekingMultiplierMenuVisible, setSeekingMultiplierMenuVisible] =
+    useState(false); // Checks and Determines if seekingMultiplier submenu is visible or not
+  const [overlayColorsMenuVisible, setOverlayColorsMenuVisible] =
     useState(false); // Checks and Determines if seekingMultiplier submenu is visible or not
 
   // Remote control keybinds for special interaction with video player. (Improvise adapt overcome)!
@@ -369,20 +372,19 @@ const StreamScreen = ({navigation, route}) => {
       seconds,
     )}`;
   };
-  /* const modifyHistory = async () => {
+  const modifyHistory = async () => {
     if (isShow) {
       await addHistory(tvdb_id, tmdb_id, season, episode, progress * 100);
     } else {
       await addHistory(0, tmdb_id, 0, 0, progress * 100);
     }
-  }; */
+  };
 
-  /* if (status.isLoaded && !durationSet && !tutorialVisible) {
+  if (status.isLoaded && !durationSet && !tutorialVisible) {
     if (isShow) {
       getSingleHistory(tvdb_id, tmdb_id, season, episode).then(data => {
         data.percentage !== null
-          ? video.current
-              .setPositionAsync(status.durationMillis * (data.percentage / 100))
+          ?controlVideo.seek(status.durationMillis * (data.percentage / 100))
               .then(() => {})
           : null;
         setDurationSet(true);
@@ -390,14 +392,13 @@ const StreamScreen = ({navigation, route}) => {
     } else {
       getSingleHistory(0, tmdb_id, 0, 0).then(data => {
         data.percentage !== null
-          ? video.current
-              .setPositionAsync(status.durationMillis * (data.percentage / 100))
+          ? controlVideo.seek(status.durationMillis * (data.percentage / 100))
               .then(() => {})
           : null;
         setDurationSet(true);
       });
     }
-  } */
+  }
 
   // https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_30mb.mp4
   // https://rinzry2.rinzry2.workers.dev/0:/Movies/The%20Lost%20City%20(2022)/The%20Lost%20City%20(2022)%20WEBDL-1080p%208bit%20h264%20AAC%202.0%20-CMRG.mp4
@@ -433,12 +434,15 @@ const StreamScreen = ({navigation, route}) => {
           onProgress={async Status => {
             setStatus(Status);
             setProgress(Status.currentTime / Status.seekableDuration);
+            if (durationSet && !tutorialVisible) {
+              await modifyHistory();
+            }
           }}
           onError={err => {
             console.error(err);
           }}
           onSeek={() => {
-            hasSeeked === 0 ? setHasSeeked(1) : setHasSeeked(0);
+            setHasSeeked(hasSeeked++);
           }}
         />
       </TouchableOpacity>
@@ -464,10 +468,10 @@ const StreamScreen = ({navigation, route}) => {
             flexDirection: 'row',
             justifyContent: 'space-between',
             alignItems: 'center',
-            backgroundColor: '#001018',
+            backgroundColor: overlayColors[0],
             padding: width * 0.01,
             borderRadius: 10,
-            borderColor: '#002C5A',
+            borderColor: overlayColors[1],
             borderWidth: width * 0.0015,
           }}>
           <Text
@@ -799,6 +803,16 @@ const StreamScreen = ({navigation, route}) => {
                 </Text>
               </View>
             </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setOverlayColorsMenuVisible(true);
+              }}>
+              <View style={styles.settingSection}>
+                <Text style={styles.settingSectionText}>
+                  change VideoPlayer Theme
+                </Text>
+              </View>
+            </TouchableOpacity>
           </ScrollView>
         </View>
       </Modal>
@@ -854,11 +868,63 @@ const StreamScreen = ({navigation, route}) => {
           </ScrollView>
         </View>
       </Modal>
+      <Modal // subtitles' colors' submenu used to change subtitles' color
+        animationType="slide"
+        transparent={true}
+        visible={overlayColorsMenuVisible}
+        onRequestClose={() => {
+          setOverlayColorsMenuVisible(false);
+        }}>
+        <View style={styles.settingsMain}>
+          <ScrollView>
+            <TouchableOpacity
+              onPress={() => {
+                setOverlayColor(['#001018','#002C5A']);
+              }}>
+              <View style={styles.settingSection}>
+                <Text style={styles.settingSectionText}>blueish</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setOverlayColor(['#8aa29e','#fafafa']);
+              }}>
+              <View style={styles.settingSection}>
+                <Text style={styles.settingSectionText}>somethingish idk</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setOverlayColor(['#690C0C','#CE2424']);
+              }}>
+              <View style={styles.settingSection}>
+                <Text style={styles.settingSectionText}>reddish</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setOverlayColor(['#001515','#006666']);
+              }}>
+              <View style={styles.settingSection}>
+                <Text style={styles.settingSectionText}>greenish</Text>
+              </View>
+            </TouchableOpacity>
+          </ScrollView>
+        </View>
+      </Modal>
+      
     </View>
   );
 };
 
 export default StreamScreen;
+
+
+
+/*  */
+
+
+
 /*   */
 // <WebView source={{uri: EU}} style={styles.video} />
 

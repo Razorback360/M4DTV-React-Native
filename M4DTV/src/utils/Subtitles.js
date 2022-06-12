@@ -5,7 +5,7 @@ import {Text} from 'react-native';
 
 const Subtitles = ({currentTime, hasSeeked, textStyle, subtitlesArray}) => {
   const [subtitles, setSubtitles] = useState(null);
-  // const [parsedSubtitles, setParsedSubtitles] = useState(null);
+  const [parsedSubtitles, setParsedSubtitles] = useState(null);
   const [text, setText] = useState(null);
   const [isSubtitlesSynced, setIsSubtitlesSynced] = useState(true);
   // const [videoTime, setVideoTime] = useState(0);
@@ -13,9 +13,11 @@ const Subtitles = ({currentTime, hasSeeked, textStyle, subtitlesArray}) => {
   // console.log(subtitlesArray);
 
   useEffect(() => {
-    setText('');
+    if (currentTime > subtitlesArray[0].startTime) {
+      setText('');
+      setIsSubtitlesSynced(false);
+    }
     setSubtitles(subtitlesArray);
-    setIsSubtitlesSynced(false);
   }, [subtitlesArray, hasSeeked]);
 
   /*   useEffect(() => {
@@ -84,26 +86,26 @@ const Subtitles = ({currentTime, hasSeeked, textStyle, subtitlesArray}) => {
                 let middleOfSubtiltesArray = Math.floor(
                   subtitlesCopy.length / 2,
                 );
-                console.log(
+                /* console.log(
                   'middleOfSubtiltesArray: ',
                   middleOfSubtiltesArray,
                   subtitles[middleOfSubtiltesArray].endTime,
-                );
+                ); */
                 if (currentTime <= subtitles[middleOfSubtiltesArray].endTime) {
                   subtitlesCopy = subtitlesCopy.slice(
                     0,
                     middleOfSubtiltesArray + 1,
                   );
-                  console.log(
+                  /* console.log(
                     `current Time: ${currentTime} is less than the ${middleOfSubtiltesArray}'s subtitle's end time: ${subtitles[middleOfSubtiltesArray].endTime}`,
-                  );
+                  ); */
                 } else {
                   subtitlesCopy = subtitlesCopy.slice(middleOfSubtiltesArray);
-                  console.log(
+                  /* console.log(
                     `current Time: ${currentTime} is more than the ${middleOfSubtiltesArray}'s subtitle's end time: ${subtitles[middleOfSubtiltesArray].endTime}`,
-                  );
+                  ); */
                 }
-                console.log('subtitlesCopy.length: ', subtitlesCopy.length);
+                // console.log('subtitlesCopy.length: ', subtitlesCopy.length);
               }
             }
             //console.log('subtitlesCopy: ', subtitlesCopy);
