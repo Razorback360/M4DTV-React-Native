@@ -11,7 +11,7 @@ import {
   Modal,
   useTVEventHandler,
   ScrollView,
-  Button,
+  // Button,
 } from 'react-native';
 import {
   getStreamMovie,
@@ -30,7 +30,7 @@ import Video from 'react-native-video';
 // import axios from 'axios';
 import vttToJson from 'vtt-to-json';
 import {getSubtitles} from '../utils/Requests';
-import {VLCPlayer, VlCPlayerView} from 'react-native-vlc-media-player';
+// import {VLCPlayer, VlCPlayerView} from 'react-native-vlc-media-player';
 // import LinearGradient from 'react-native-linear-gradient';
 
 const StreamScreen = ({navigation, route}) => {
@@ -49,17 +49,17 @@ const StreamScreen = ({navigation, route}) => {
   let controlVideo = useRef(null); // Used to control Video player.
   const [settingsVisible, setSettingVisible] = useState(false); // Determines if settings menu is visible or not
   const [serversVisible, setServersVisible] = useState(false); // Determines if servers submenu is visible or not
-  const [isdisabledOpacity, setIsDisabledOpacity] = useState(false); // :shrug: Later use
+  const [isdisabledOpacity] = useState(false); // :shrug: Later use
   const [isPaused, setIsPaused] = useState(false); // Determines if video player is paused
   const [isBuffering, setIsBuffering] = useState(false); // Determines if video player is Buffering
-  const [isLoaded, setIsLoaded] = useState(false); // Determines if video player is Buffering
+  // const [isLoaded, setIsLoaded] = useState(false); // Determines if video player is Buffering
   const [key, setKey] = useState(null); // Sets streaming key to get the stream from the server
   const [tutorialVisible, setTutorialVisible] = useState(true);
   const [status, setStatus] = useState({}); // Gets video status for use with video overlay
   const [progress, setProgress] = useState(0); // Video progress
   const [disableOverlayVisible, setDisableOverlayVisible] = useState(0); // Sets if progress overlay is visible or not
   const [overlayColors, setOverlayColors] = useState(['#001018', '#002C5A']);
-  const [durationSet, setDurationSet] = useState(false);
+  const [durationSet] = useState(false);
   const [seekingMultiplier, setSeekingMultiplier] = useState(1);
   const [hasSeeked, setHasSeeked] = useState(0); // Checks if video is seeked; used to help sync subtitles
   const [subtitlePosition, setSubtitlePosition] = useState('4%'); // checks and sets subtitles position
@@ -76,7 +76,6 @@ const StreamScreen = ({navigation, route}) => {
     useState(false); // Checks and Determines if seekingMultiplier submenu is visible or not
   const [overlayColorsMenuVisible, setOverlayColorsMenuVisible] =
     useState(false); // Checks and Determines if seekingMultiplier submenu is visible or not
-  const [sourceVideo, setSourceVideo] = useState(AS);
 
   // Remote control keybinds for special interaction with video player. (Improvise adapt overcome)!
   const myTVEventHandler = evt => {
@@ -93,7 +92,7 @@ const StreamScreen = ({navigation, route}) => {
       // Show/Hide video player progress.
       else if (evt.eventType === 'up' && !settingsVisible) {
         disableOverlayVisible === 0 && !isPaused
-          ? setSubtitlePosition('10%')
+          ? setSubtitlePosition('15%')
           : setSubtitlePosition('4%');
         disableOverlayVisible === 0 && !isPaused
           ? setDisableOverlayVisible(1)
@@ -112,13 +111,13 @@ const StreamScreen = ({navigation, route}) => {
 
       // Play/Pause video player (Select button).
       else if (evt.eventType === 'select' && !settingsVisible) {
-        isPaused ? setSubtitlePosition('4%') : setSubtitlePosition('10%');
+        isPaused ? setSubtitlePosition('4%') : setSubtitlePosition('15%');
         isPaused ? setIsPaused(false) : setIsPaused(true);
       }
 
       // Play/Pause video player (Play/Pause button).
       else if (evt.eventType === 'playPause' && !settingsVisible) {
-        isPaused ? setSubtitlePosition('4%') : setSubtitlePosition('10%');
+        isPaused ? setSubtitlePosition('4%') : setSubtitlePosition('15%');
         isPaused ? setIsPaused(false) : setIsPaused(true);
       }
     }
@@ -436,11 +435,13 @@ const StreamScreen = ({navigation, route}) => {
           ref={ref => {
             controlVideo = ref;
           }}
-          source={{uri: AS}}
+          source={{
+            uri: 'http://95.216.3.78:8081/Morbius.2022.2160p.10bit.HDR.DV.BluRay.8CH.x265.HEVC-PSA.mkv',
+          }}
           style={styles.video}
           resizeMode={'contain'}
           paused={isPaused}
-          poster={backdropImage}
+          // poster={backdropImage}
           posterResizeMode={'contain'}
           onLoadStart={() => {
             setIsBuffering(true);
@@ -455,16 +456,18 @@ const StreamScreen = ({navigation, route}) => {
               await modifyHistory();
             }
           }}
-          onLoad={Status => {
+          /* onLoad={Status => {
             getSingleHistory(0, tmdb_id, 0, 0).then(data => {
               data.percentage !== null
                 ? controlVideo
                     .seek(Status.duration * (data.percentage / 100))
-                    // .then(() => {})
-                    // console.log('testing onload', Status.duration)
-                : null;
+                    .then(() => {
+                      console.log('testing onload', Status.duration);
+                    })
+                : // console.log('testing onload', Status.duration)
+                  null;
             });
-          }}
+          }} */
           onError={err => {
             console.error(err);
           }}
