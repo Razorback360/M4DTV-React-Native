@@ -1,4 +1,21 @@
-subtitles available in 8 colors (white, cyan, red, green, yellow, magenta, blue, ochre)
-subtitles available in 5 sizes (20%, 40%, 60%, 80%, 100%)
-redesigned the submenus (changed the color and size)
-added options for fast forward & rewind (10s, 30s, 1m, 69s, 420s)
+__**Changelog:**__
+
+- added subtitles 
+- a little ui changes here and there
+- you can now change subtitle size and color from the menu
+- you can now change how much time on each seek from the menu. (ex: 10s, 30s, 1m)
+- changed the media player
+- you can now change the media player themes from the options menu
+- you can now stare at the media's backdrop while waiting for the media to load 
+- added a button to forcefully sync the subtitles incase they lag or freeze
+
+
+__**What "Bugs" to not report:**__
+
+- The media player's menus stack on each other. Will be fixed later. Just deal with it for now.
+- Quality having no use on the stream. Will be added later for 4K once we have a big enough library and 4k streaming implemented
+- Trailer button not working. Youtube is a dick in terms of videos, i need to figure out how to get a direct link instead of a yt link to get it to work.
+- Auto play next episode. This will come at the same time as the site getting the autoplay feature.
+- Subtitles takes a little delay to appear after seeking(1s - 15s). Please try to use the sync now button if it took longer. Please report if it takes more than that and the sync button didn't fix it.
+
+don't forget to donate to keep the servers alive
