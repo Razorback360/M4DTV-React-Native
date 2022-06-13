@@ -52,8 +52,9 @@ const StreamScreen = ({navigation, route}) => {
   const [isdisabledOpacity, setIsDisabledOpacity] = useState(false); // :shrug: Later use
   const [isPaused, setIsPaused] = useState(false); // Determines if video player is paused
   const [isBuffering, setIsBuffering] = useState(false); // Determines if video player is Buffering
+  const [isLoaded, setIsLoaded] = useState(false); // Determines if video player is Buffering
   const [key, setKey] = useState(null); // Sets streaming key to get the stream from the server
-  const [tutorialVisible, setTutorialVisible] = useState(false);
+  const [tutorialVisible, setTutorialVisible] = useState(true);
   const [status, setStatus] = useState({}); // Gets video status for use with video overlay
   const [progress, setProgress] = useState(0); // Video progress
   const [disableOverlayVisible, setDisableOverlayVisible] = useState(0); // Sets if progress overlay is visible or not
@@ -75,6 +76,7 @@ const StreamScreen = ({navigation, route}) => {
     useState(false); // Checks and Determines if seekingMultiplier submenu is visible or not
   const [overlayColorsMenuVisible, setOverlayColorsMenuVisible] =
     useState(false); // Checks and Determines if seekingMultiplier submenu is visible or not
+  const [sourceVideo, setSourceVideo] = useState(AS);
 
   // Remote control keybinds for special interaction with video player. (Improvise adapt overcome)!
   const myTVEventHandler = evt => {
@@ -389,12 +391,12 @@ const StreamScreen = ({navigation, route}) => {
     }
   };
 
-  if (status.isLoaded && !durationSet && !tutorialVisible) {
+  /* if (durationSet === false && tutorialVisible === false) {
     if (isShow) {
-      getSingleHistory(tvdb_id, tmdb_id, season, episode).then(data => {
+      getSingleHistory(tvdb_id, tmdb_id, seasron, episode).then(data => {
         data.percentage !== null
           ? controlVideo
-              .seek(status.durationMillis * (data.percentage / 100))
+              .seek(status.seekableDuration * (data.percentage / 100))
               .then(() => {})
           : null;
         setDurationSet(true);
@@ -403,13 +405,14 @@ const StreamScreen = ({navigation, route}) => {
       getSingleHistory(0, tmdb_id, 0, 0).then(data => {
         data.percentage !== null
           ? controlVideo
-              .seek(status.durationMillis * (data.percentage / 100))
+              .seek(status.seekableDuration * (data.percentage / 100))
               .then(() => {})
           : null;
         setDurationSet(true);
+        console('hi', durationSet);
       });
     }
-  }
+  } */
 
   // https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_30mb.mp4
   // https://rinzry2.rinzry2.workers.dev/0:/Movies/The%20Lost%20City%20(2022)/The%20Lost%20City%20(2022)%20WEBDL-1080p%208bit%20h264%20AAC%202.0%20-CMRG.mp4
@@ -420,7 +423,7 @@ const StreamScreen = ({navigation, route}) => {
   // https://rinzry3.rinzry3.workers.dev/0:/TV/Breaking%20Bad/Season%201/Breaking%20Bad%20-%20S01E07%20-%20A%20No-Rough-Stuff-Type%20Deal%20Bluray-1080p.mkv
   // https://rinzry3.rinzry3.workers.dev/0:/TV/Breaking%20Bad/S01-S05%20x265%201080p/s01/Breaking_Bad_S01E07_x265_1080p_BluRay_30nama_30NAMA.mkv
   // https://dl6.webmfiles.org/TearsOfSteel_720p_h265.mkv
-  // https://dl6.webmfiles.org/TearsOfSteel_720p_h265.mkv
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -433,9 +436,7 @@ const StreamScreen = ({navigation, route}) => {
           ref={ref => {
             controlVideo = ref;
           }}
-          source={{
-            uri: AS,
-          }}
+          source={{uri: AS}}
           style={styles.video}
           resizeMode={'contain'}
           paused={isPaused}
@@ -453,6 +454,16 @@ const StreamScreen = ({navigation, route}) => {
             if (durationSet && !tutorialVisible) {
               await modifyHistory();
             }
+          }}
+          onLoad={Status => {
+            getSingleHistory(0, tmdb_id, 0, 0).then(data => {
+              data.percentage !== null
+                ? controlVideo
+                    .seek(Status.duration * (data.percentage / 100))
+                    // .then(() => {})
+                    // console.log('testing onload', Status.duration)
+                : null;
+            });
           }}
           onError={err => {
             console.error(err);
@@ -568,14 +579,8 @@ const StreamScreen = ({navigation, route}) => {
           <ScrollView>
             <TouchableOpacity
               onPress={() => {
-                controlVideo.current.getStatusAsync().then(data => {
-                  controlVideo.current.unloadAsync().then(() => {
-                    controlVideo.current.loadAsync(
-                      {uri: AS},
-                      {positionMillis: data.positionMillis, shouldPlay: true},
-                    );
-                  });
-                });
+                controlVideo.source = {uri: AS};
+                console.log(controlVideo.source);
               }}>
               <View style={styles.settingSection}>
                 <Text style={styles.settingSectionText}>AS</Text>
@@ -583,14 +588,7 @@ const StreamScreen = ({navigation, route}) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                controlVideo.current.getStatusAsync().then(data => {
-                  controlVideo.current.unloadAsync().then(() => {
-                    controlVideo.current.loadAsync(
-                      {uri: EU},
-                      {positionMillis: data.positionMillis, shouldPlay: true},
-                    );
-                  });
-                });
+                controlVideo.source = {uri: EU};
               }}>
               <View style={styles.settingSection}>
                 <Text style={styles.settingSectionText}>EU (Default)</Text>
@@ -598,14 +596,7 @@ const StreamScreen = ({navigation, route}) => {
             </TouchableOpacity>
             <TouchableOpacity
               onPress={() => {
-                controlVideo.current.getStatusAsync().then(data => {
-                  controlVideo.current.unloadAsync().then(() => {
-                    controlVideo.current.loadAsync(
-                      {uri: US},
-                      {positionMillis: data.positionMillis, shouldPlay: true},
-                    );
-                  });
-                });
+                controlVideo.source = {uri: US};
               }}>
               <View style={styles.settingSection}>
                 <Text style={styles.settingSectionText}>US</Text>
@@ -886,7 +877,7 @@ const StreamScreen = ({navigation, route}) => {
           </ScrollView>
         </View>
       </Modal>
-      <Modal // subtitles' colors' submenu used to change subtitles' color
+      <Modal // overlay's colors' submenu used to change videoplayer's color
         animationType="slide"
         transparent={true}
         visible={overlayColorsMenuVisible}
@@ -925,6 +916,14 @@ const StreamScreen = ({navigation, route}) => {
               }}>
               <View style={styles.settingSection}>
                 <Text style={styles.settingSectionText}>ochreish idk</Text>
+              </View>
+            </TouchableOpacity>
+            <TouchableOpacity
+              onPress={() => {
+                setOverlayColors(['#0D0C00', '#4ddaee']);
+              }}>
+              <View style={styles.settingSection}>
+                <Text style={styles.settingSectionText}>Blue Dacnis</Text>
               </View>
             </TouchableOpacity>
           </ScrollView>
