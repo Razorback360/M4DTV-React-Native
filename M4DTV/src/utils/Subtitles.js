@@ -39,11 +39,11 @@ const Subtitles = ({currentTime, hasSeeked, textStyle, subtitlesArray}) => {
                   let middleOfSubtitlesArray = Math.floor(
                     subtitlesCopy.length / 2,
                   );
-                  console.log(
+                  /* console.log(
                     'middleOfSubtitlesArray: ',
                     middleOfSubtitlesArray,
                     subtitles[middleOfSubtitlesArray].endTime,
-                  );
+                  ); */
                   if (
                     currentTime <= subtitles[middleOfSubtitlesArray].endTime
                   ) {
@@ -51,16 +51,16 @@ const Subtitles = ({currentTime, hasSeeked, textStyle, subtitlesArray}) => {
                       0,
                       middleOfSubtitlesArray + 1,
                     );
-                    console.log(
+                    /*  console.log(
                       `current Time: ${currentTime} is less than the ${middleOfSubtitlesArray}'s subtitle's end time: ${subtitles[middleOfSubtitlesArray].endTime}`,
-                    );
+                    ); */
                   } else {
                     subtitlesCopy = subtitlesCopy.slice(middleOfSubtitlesArray);
-                    console.log(
+                    /* console.log(
                       `current Time: ${currentTime} is more than the ${middleOfSubtitlesArray}'s subtitle's end time: ${subtitles[middleOfSubtitlesArray].endTime}`,
-                    );
+                    ); */
                   }
-                  console.log('subtitlesCopy.length: ', subtitlesCopy.length);
+                  // console.log('subtitlesCopy.length: ', subtitlesCopy.length);
                 }
               }
               //console.log('subtitlesCopy: ', subtitlesCopy);
